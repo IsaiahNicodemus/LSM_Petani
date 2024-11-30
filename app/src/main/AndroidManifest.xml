@@ -13,6 +13,18 @@
         android:theme="@style/Theme.LSM_Petani"
         tools:targetApi="31">
         <activity
+            android:name=".client.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DeleteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UpdateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UploadActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
