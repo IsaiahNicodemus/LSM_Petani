@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
             insets
 //            KON
 //            MEMEKAJG
+            //            MEMEKAJG
         }
     }
 }
