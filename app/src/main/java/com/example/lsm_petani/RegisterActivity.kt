@@ -43,8 +43,12 @@ class RegisterActivity : AppCompatActivity() {
                                         if (dbTask.isSuccessful) {
                                             Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
 
-                                            // Pindah ke HomeActivity dan kirim data role
-                                            val intent = Intent(this, HomeActivity::class.java)
+                                            // Simpan status login di SharedPreferences
+                                            val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+                                            sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
+
+                                            // Pindah ke MainActivity dan kirim data role
+                                            val intent = Intent(this, MainActivity::class.java)
                                             intent.putExtra("role", role)
                                             startActivity(intent)
                                             finish()
