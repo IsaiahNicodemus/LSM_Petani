@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title Section -->
+        <TextView
+            android:id="@+id/tvEditProfileTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ubah informasi akun anda"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/lavender"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Edit Username -->
+        <EditText
+            android:id="@+id/etEditUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Username"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <!-- Edit Email -->
+        <EditText
+            android:id="@+id/etEditEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Email"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:inputType="textEmailAddress" />
+
+        <!-- Edit Password -->
+        <EditText
+            android:id="@+id/etEditPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Password"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:inputType="textPassword" />
+
+        <!-- Save Changes Button -->
+        <Button
+            android:id="@+id/btnSaveChanges"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Changes"
+            android:padding="16dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:background="@drawable/lavender_border"
+            android:layout_marginTop="24dp"
+            android:elevation="4dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
+</ScrollView>
