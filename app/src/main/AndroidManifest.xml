@@ -13,20 +13,24 @@
         android:theme="@style/Theme.LSM_Petani"
         tools:targetApi="31">
         <activity
-            android:name=".client.MainActivity"
+            android:name=".EditProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".DeleteActivity"
+            android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".UpdateActivity"
+            android:name=".DrawerActivity"
             android:exported="false" />
         <activity
-            android:name=".UploadActivity"
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomeActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.LSM_Petani">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
