@@ -5,12 +5,23 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Input Username -->
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:inputType="text" />
+
+    <!-- Input Email -->
     <EditText
         android:id="@+id/etNewUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username" />
+        android:hint="Email"
+        android:inputType="textEmailAddress" />
 
+    <!-- Input Password -->
     <EditText
         android:id="@+id/etNewPassword"
         android:layout_width="match_parent"
@@ -18,12 +29,14 @@
         android:hint="Password"
         android:inputType="textPassword" />
 
+    <!-- Role Selection -->
     <Spinner
         android:id="@+id/spinnerRole"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:entries="@array/roles" />
 
+    <!-- Register Button -->
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"

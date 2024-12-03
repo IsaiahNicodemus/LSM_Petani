@@ -15,27 +15,34 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        val etNewUsername = findViewById<EditText>(R.id.etNewUsername)
-        val etNewPassword = findViewById<EditText>(R.id.etNewPassword)
-        val spinnerRole = findViewById<Spinner>(R.id.spinnerRole)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
+        // Referensi UI
+        val etUsername = findViewById<EditText>(R.id.etUsername) // Username
+        val etNewUsername = findViewById<EditText>(R.id.etNewUsername) // Email
+        val etNewPassword = findViewById<EditText>(R.id.etNewPassword) // Password
+        val spinnerRole = findViewById<Spinner>(R.id.spinnerRole) // Role
+        val btnRegister = findViewById<Button>(R.id.btnRegister) // Button Register
 
         auth = FirebaseAuth.getInstance()
 
         btnRegister.setOnClickListener {
-            val email = etNewUsername.text.toString()
-            val password = etNewPassword.text.toString()
-            val role = spinnerRole.selectedItem.toString()
+            val username = etUsername.text.toString() // Ambil input username
+            val email = etNewUsername.text.toString() // Ambil input email
+            val password = etNewPassword.text.toString() // Ambil input password
+            val role = spinnerRole.selectedItem.toString() // Ambil input role
 
-            if (email.isNotEmpty() && password.isNotEmpty()) {
+            // Validasi input
+            if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                // Registrasi di Firebase Authentication
                 auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val userId = auth.currentUser?.uid
                             if (userId != null) {
+                                // Simpan data di Firebase Database
                                 val database = FirebaseDatabase.getInstance().getReference("users")
                                 val user = mapOf(
-                                    "username" to email,
+                                    "username" to username, // Simpan username
+                                    "email" to email,
                                     "role" to role
                                 )
                                 database.child(userId).setValue(user)
@@ -47,7 +54,7 @@ class RegisterActivity : AppCompatActivity() {
                                             val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
                                             sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
 
-                                            // Pindah ke MainActivity dan kirim data role
+                                            // Pindah ke MainActivity
                                             val intent = Intent(this, MainActivity::class.java)
                                             intent.putExtra("role", role)
                                             startActivity(intent)
