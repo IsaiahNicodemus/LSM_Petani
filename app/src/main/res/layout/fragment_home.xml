@@ -1,18 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Home Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/lavender"/>
+        android:orientation="vertical">
 
-</RelativeLayout>
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Form LSM Pertanian"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp" />
+
+        <!-- Upload Foto -->
+        <ImageView
+            android:id="@+id/ivPhotoPreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/ic_image_placeholder" />
+
+        <Button
+            android:id="@+id/btnUploadPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Foto"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Input Nama -->
+        <EditText
+            android:id="@+id/etNama"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Masukkan Nama Lengkap"
+            android:padding="12dp" />
+
+        <!-- Input Lokasi -->
+        <Button
+            android:id="@+id/btnSelectLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pilih Lokasi"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvSelectedLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lokasi belum dipilih"
+            android:paddingTop="8dp"
+            android:textColor="@color/grey" />
+
+        <!-- Input Luas Lahan -->
+        <EditText
+            android:id="@+id/etLuasLahan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Luas Lahan (m²)"
+            android:inputType="number"
+            android:layout_marginTop="16dp"
+            android:padding="12dp" />
+
+        <!-- Input Nama Pemilik -->
+        <EditText
+            android:id="@+id/etNamaPemilik"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nama Pemilik"
+            android:layout_marginTop="16dp"
+            android:padding="12dp" />
+
+        <EditText
+            android:id="@+id/etNoHandphone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="No Handphone"
+            android:inputType="phone"
+            android:layout_marginTop="8dp" />
+
+
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kirim"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/black" />
+    </LinearLayout>
+</ScrollView>

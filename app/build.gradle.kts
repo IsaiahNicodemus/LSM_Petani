@@ -52,4 +52,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation ("com.google.firebase:firebase-auth:21.5.0")
+    implementation ("com.google.firebase:firebase-storage:20.2.0")
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+
+
 }
