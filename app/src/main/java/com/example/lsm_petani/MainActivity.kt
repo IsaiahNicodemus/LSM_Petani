@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -53,6 +54,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, HomeFragment()).commit()
             navigationView.setCheckedItem(R.id.nav_home)
         }
+
+        // Tangkap data ekstra untuk navigasi
+        val navigateTo = intent.getStringExtra("navigateTo")
+        if (navigateTo == "FarmersFragment") {
+            openFragment(FarmersFragment()) // Buka FarmersFragment
+        } else {
+            // Fragment default (misalnya HomeFragment)
+            openFragment(HomeFragment())
+        }
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment) // Ganti `fragment_container` dengan ID container Anda
+            .commit()
     }
 
     private fun loadUserData() {
