@@ -7,4 +7,15 @@
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="screen1">Upload foto lahan anda</string>
+    <string name="screen2">Isi semua data yang diperlukan</string>
+    <string name="screen3">Jadilah bagian dari kami, Farmers!</string>
+
+    <string name="screen1desc">Ambil foto atau pilih foto lahan yang ingin Anda daftarkan untuk bergabung dengan kami.</string>
+    <string name="screen2desc">Isi data lengkap mengenai diri Anda dan lahan pertanian Anda untuk melanjutkan proses verifikasi.</string>
+    <string name="screen3desc">Bergabunglah dengan komunitas petani kami dan nikmati berbagai keuntungan yang kami tawarkan.</string>
+
+    <string name="startDesc">Unggah foto lahan Anda, isi data diri, dan menjadi bagian dari komunitas petani kami.</string>
+
 </resources>

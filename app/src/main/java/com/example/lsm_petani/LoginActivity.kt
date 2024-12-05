@@ -16,6 +16,17 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Cek apakah pengguna sudah login
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+        if (isLoggedIn) {
+            // Jika sudah login, arahkan ke MainActivity
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_login)
 
         val etUsername = findViewById<EditText>(R.id.etUsername)
@@ -43,7 +54,6 @@ class LoginActivity : AppCompatActivity() {
                                 val role = snapshot.child("role").value.toString()
 
                                 // Simpan status login
-                                val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
                                 sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
 
                                 // Pindah ke MainActivity

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -24,9 +25,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Periksa apakah pengguna sudah login
+        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+
+        if (!isLoggedIn) {
+            // Jika belum login, arahkan ke LoginActivity
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
-        // Inisialisasi komponen UI
         drawerLayout = findViewById(R.id.drawer_layout)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -34,10 +47,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         navigationView = findViewById(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
-        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         auth = FirebaseAuth.getInstance()
 
-        // Set toggle untuk drawer navigation
         val toggle = ActionBarDrawerToggle(
             this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav
         )
@@ -47,7 +58,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Load data pengguna ke header
         loadUserData()
 
-        // Set fragment default (HomeFragment)
+        // Set fragment default
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment()).commit()
@@ -58,14 +69,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun loadUserData() {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            // Referensi ke data pengguna di Firebase
             val database = FirebaseDatabase.getInstance().getReference("users").child(userId)
 
             database.get().addOnSuccessListener { snapshot ->
                 val username = snapshot.child("username").value?.toString() ?: "N/A"
                 val email = snapshot.child("email").value?.toString() ?: "N/A"
 
-                // Update header layout dengan username dan email
                 val headerView = navigationView.getHeaderView(0)
                 val tvUsername = headerView.findViewById<TextView>(R.id.tvUsername)
                 val tvEmail = headerView.findViewById<TextView>(R.id.tvEmail)
@@ -97,34 +106,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun handleLoginLogout() {
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-        if (isLoggedIn) {
-            // Logout logic
-            sharedPreferences.edit().putBoolean("isLoggedIn", false).apply()
-            auth.signOut()
-            Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
-            // Pindah ke LoginActivity
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        } else {
-            // Pindah ke LoginActivity jika belum login
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-        updateMenuTitle()
-    }
+        sharedPreferences.edit().remove("isLoggedIn").apply()
+        auth.signOut()
+        Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
 
-    private fun updateMenuTitle() {
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-        val menuItem = navigationView.menu.findItem(R.id.nav_logout)
-        menuItem?.title = if (isLoggedIn) "Logout" else "Login"
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateMenuTitle()
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     override fun onBackPressed() {
