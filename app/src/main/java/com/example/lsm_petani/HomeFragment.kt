@@ -68,47 +68,33 @@ class HomeFragment : Fragment() {
         val nama = etNama.text.toString()
         val luasLahan = etLuasLahan.text.toString()
         val namaPemilik = etNamaPemilik.text.toString()
-        val noHandphone = etNoHandphone.text.toString()
+        val noHandphone = etNoHandphone.text.toString() // Ambil input No Handphone
 
-        if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null || photoUri == null) {
+        if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null) {
             Toast.makeText(context, "Harap lengkapi semua data", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Upload foto ke Firebase Storage
-        val storageRef = FirebaseStorage.getInstance().reference.child("farmer_photos/${System.currentTimeMillis()}.jpg")
-        val uploadTask = storageRef.putFile(photoUri!!)
+        // Simpan data ke Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
+        val data = mapOf(
+            "nama" to nama,
+            "luasLahan" to luasLahan,
+            "namaPemilik" to namaPemilik,
+            "noHandphone" to noHandphone, // Field Baru
+            "lokasi" to selectedLocation
+        )
 
-        uploadTask.addOnSuccessListener { taskSnapshot ->
-            // Ambil URL foto setelah berhasil diunggah
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                val photoUrl = uri.toString()
-
-                // Simpan data ke Realtime Database
-                val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
-                val data = mapOf(
-                    "nama" to nama,
-                    "luasLahan" to luasLahan,
-                    "namaPemilik" to namaPemilik,
-                    "noHandphone" to noHandphone,
-                    "lokasi" to selectedLocation,
-                    "photoUrl" to photoUrl // Simpan URL foto
-                )
-
-                databaseRef.setValue(data)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
-                        resetForm()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(context, "Gagal menyimpan data", Toast.LENGTH_SHORT).show()
-                    }
+        databaseRef.setValue(data)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
+                // Reset form setelah berhasil disimpan
+                resetForm()
             }
-        }.addOnFailureListener {
-            Toast.makeText(context, "Gagal mengunggah foto", Toast.LENGTH_SHORT).show()
-        }
+            .addOnFailureListener {
+                Toast.makeText(context, "Gagal menyimpan data", Toast.LENGTH_SHORT).show()
+            }
     }
-
 
     private fun resetForm() {
         etNama.text.clear()
