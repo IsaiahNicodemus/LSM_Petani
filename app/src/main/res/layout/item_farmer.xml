@@ -56,4 +56,21 @@
         android:textColor="@color/black"
         android:textSize="14sp" />
 
+    <TextView
+        android:id="@+id/tvFarmerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Ditampilkan"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
+
+    <Button
+        android:id="@+id/btnToggleStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Ditampilkan"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" /> <!-- Default: disembunyikan untuk user biasa -->
+
+
 </LinearLayout>

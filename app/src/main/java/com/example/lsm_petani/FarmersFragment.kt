@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 
@@ -68,33 +69,34 @@ class FarmersFragment : Fragment() {
         val nama = etNama.text.toString()
         val luasLahan = etLuasLahan.text.toString()
         val namaPemilik = etNamaPemilik.text.toString()
-        val noHandphone = etNoHandphone.text.toString() // Ambil input No Handphone
+        val noHandphone = etNoHandphone.text.toString()
 
         if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null) {
             Toast.makeText(context, "Harap lengkapi semua data", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Simpan data ke Firebase Realtime Database
         val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
-        val data = mapOf(
-            "nama" to nama,
-            "luasLahan" to luasLahan,
-            "namaPemilik" to namaPemilik,
-            "noHandphone" to noHandphone, // Field Baru
-            "lokasi" to selectedLocation
+        val farmer = Farmer(
+            nama = nama,
+            lokasi = selectedLocation,
+            luasLahan = luasLahan,
+            namaPemilik = namaPemilik,
+            noHandphone = noHandphone,
+            photoUrl = photoUri?.toString(),
+            status = false // Default nilai status adalah false
         )
 
-        databaseRef.setValue(data)
+        databaseRef.setValue(farmer)
             .addOnSuccessListener {
                 Toast.makeText(context, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
-                // Reset form setelah berhasil disimpan
                 resetForm()
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Gagal menyimpan data", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun resetForm() {
         etNama.text.clear()
