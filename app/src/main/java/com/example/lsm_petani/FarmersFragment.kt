@@ -13,6 +13,12 @@ import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
+import androidx.core.app.ActivityCompat
+
+
 class FarmersFragment : Fragment() {
 
     private lateinit var ivPhotoPreview: ImageView

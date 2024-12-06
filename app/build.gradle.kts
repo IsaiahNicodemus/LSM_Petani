@@ -55,6 +55,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-storage:20.2.0")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+    implementation ("com.google.firebase:firebase-database:20.0.5")
+    implementation ("androidx.core:core:1.8.0")
 
     // Glide for image loading (single version)
     implementation("com.github.bumptech.glide:glide:4.15.1")

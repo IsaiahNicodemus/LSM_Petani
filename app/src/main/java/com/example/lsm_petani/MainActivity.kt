@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var navigationView: NavigationView
     private lateinit var auth: FirebaseAuth
 
+    var hasShownRoleDialog = false
+    var hasShownDataDialog = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,7 +34,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
 
         if (!isLoggedIn) {
-            // Jika belum login, arahkan ke LoginActivity
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
@@ -55,14 +57,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        // Load data pengguna ke header
         loadUserData()
 
-        // Set fragment default
+        // Periksa apakah ada navigasi khusus
+        val navigateTo = intent.getStringExtra("navigateTo")
         if (savedInstanceState == null) {
+            val fragment: Fragment = when (navigateTo) {
+                "FarmersFragment" -> FarmersFragment() // Arahkan ke FarmersFragment
+                else -> HomeFragment() // Default ke HomeFragment
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment()).commit()
-            navigationView.setCheckedItem(R.id.nav_home)
+                .replace(R.id.fragment_container, fragment).commit()
+            navigationView.setCheckedItem(if (navigateTo == "FarmersFragment") R.id.nav_form else R.id.nav_home)
         }
     }
 
