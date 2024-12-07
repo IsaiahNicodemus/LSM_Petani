@@ -22,6 +22,8 @@ class FarmersAdapter(private val farmerList: ArrayList<Farmer>, private val isAd
         val tvOwner: TextView = itemView.findViewById(R.id.tvFarmerOwner)
         val tvPhone: TextView = itemView.findViewById(R.id.tvFarmerPhone)
         val btnToggleStatus: Button = itemView.findViewById(R.id.btnToggleStatus)
+        val tvFarmerStatus: TextView = itemView.findViewById(R.id.tvFarmerStatus)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FarmerViewHolder {
@@ -37,10 +39,11 @@ class FarmersAdapter(private val farmerList: ArrayList<Farmer>, private val isAd
         holder.tvOwner.text = "Pemilik: ${farmer.namaPemilik}"
         holder.tvPhone.text = "No HP: ${farmer.noHandphone}"
 
-        val statusText = if (farmer.status) "Status: Ditampilkan" else "Status: Disembunyikan"
-        holder.btnToggleStatus.text = statusText
+        // Atur status dinamis
+        val statusText = if (farmer.status) "Status : Aktif" else "Status : Menunggu diverifikasi"
+        val tvFarmerStatus: TextView = holder.itemView.findViewById(R.id.tvFarmerStatus)
+        tvFarmerStatus.text = statusText
 
-        // Hanya admin yang bisa melihat tombol
         if (isAdmin) {
             holder.btnToggleStatus.visibility = View.VISIBLE
             holder.btnToggleStatus.setOnClickListener {
@@ -50,6 +53,7 @@ class FarmersAdapter(private val farmerList: ArrayList<Farmer>, private val isAd
             holder.btnToggleStatus.visibility = View.GONE
         }
     }
+
 
     override fun getItemCount(): Int {
         return farmerList.size
@@ -61,7 +65,7 @@ class FarmersAdapter(private val farmerList: ArrayList<Farmer>, private val isAd
         val newStatus = !farmer.status // Toggle status
 
         databaseRef.child("status").setValue(newStatus).addOnSuccessListener {
-            val statusText = if (newStatus) "Status: Ditampilkan" else "Status: Disembunyikan"
+            val statusText = if (newStatus) "Status : Aktif" else "Status : Menunggu diverifikasi"
             holder.btnToggleStatus.text = statusText
             Toast.makeText(holder.itemView.context, "Status berhasil diperbarui.", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener {
