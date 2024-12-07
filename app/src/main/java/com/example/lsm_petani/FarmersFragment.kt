@@ -11,9 +11,9 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.core.app.ActivityCompat
@@ -30,6 +30,8 @@ class FarmersFragment : Fragment() {
     private lateinit var etNamaPemilik: EditText
     private lateinit var btnSubmit: Button
     private lateinit var etNoHandphone: EditText
+
+    private lateinit var progressBar: ProgressBar
 
     private var photoUri: Uri? = null
     private var selectedLocation: String? = null
@@ -50,6 +52,7 @@ class FarmersFragment : Fragment() {
         etNamaPemilik = view.findViewById(R.id.etNamaPemilik)
         btnSubmit = view.findViewById(R.id.btnSubmit)
         etNoHandphone = view.findViewById(R.id.etNoHandphone)
+        progressBar = view.findViewById(R.id.progressBar) // Inisialisasi ProgressBar
 
         // Set button actions
         btnUploadPhoto.setOnClickListener { selectPhoto() }
@@ -78,9 +81,12 @@ class FarmersFragment : Fragment() {
         val noHandphone = etNoHandphone.text.toString()
 
         if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null) {
-            Toast.makeText(context, "Harap lengkapi semua data", Toast.LENGTH_SHORT).show()
+            showDataDialog("Harap lengkapi semua data")
             return
         }
+
+        // Tampilkan ProgressBar sebelum memulai kirim data
+        progressBar.visibility = View.VISIBLE
 
         val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
         val farmer = Farmer(
@@ -90,18 +96,35 @@ class FarmersFragment : Fragment() {
             namaPemilik = namaPemilik,
             noHandphone = noHandphone,
             photoUrl = photoUri?.toString(),
-            status = false // Default nilai status adalah false
+            status = false
         )
 
         databaseRef.setValue(farmer)
             .addOnSuccessListener {
-                Toast.makeText(context, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
+                // Operasi berhasil, sembunyikan ProgressBar dan tampilkan notifikasi dalam dialog
+                progressBar.visibility = View.GONE
+                showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin")
                 resetForm()
             }
             .addOnFailureListener {
-                Toast.makeText(context, "Gagal menyimpan data", Toast.LENGTH_SHORT).show()
+                // Operasi gagal, sembunyikan ProgressBar dan tampilkan dialog kesalahan
+                progressBar.visibility = View.GONE
+                showDataDialog("Gagal mengirim data. Silakan coba lagi")
             }
     }
+
+
+    private fun showDataDialog(message: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Informasi")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
 
 
     private fun resetForm() {

@@ -68,8 +68,7 @@
         android:id="@+id/btnToggleStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Status: Ditampilkan"
-        android:layout_marginTop="8dp"
+        android:text="Verifikasi Status"        android:layout_marginTop="8dp"
         android:visibility="gone" /> <!-- Default: disembunyikan untuk user biasa -->
 
 
