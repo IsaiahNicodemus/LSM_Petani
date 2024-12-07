@@ -1,5 +1,8 @@
 package com.example.lsm_petani
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,7 +10,10 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
 
@@ -29,7 +35,7 @@ class FarmersAdapter(
     }
 
     inner class FarmerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val ivPhoto: ImageView = itemView.findViewById(R.id.ivFarmerPhoto)
+        private val ivFarmerPhoto: ImageView = itemView.findViewById(R.id.ivFarmerPhoto)
         private val tvName: TextView = itemView.findViewById(R.id.tvFarmerName)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvFarmerLocation)
         private val tvArea: TextView = itemView.findViewById(R.id.tvFarmerArea)
@@ -42,7 +48,6 @@ class FarmersAdapter(
         private val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
 
         fun bind(farmer: Farmer) {
-            // Bind data dari model ke tampilan
             tvName.text = farmer.nama
             tvLocation.text = farmer.lokasi
             tvArea.text = "Luas: ${farmer.luasLahan} m²"
@@ -52,7 +57,6 @@ class FarmersAdapter(
             val statusText = if (farmer.status) "Aktif" else "Menunggu diverifikasi"
             tvStatus.text = "Status: $statusText"
 
-            // Atur tombol berdasarkan apakah pengguna adalah admin
             if (isAdmin) {
                 btnToggleStatus.visibility = View.VISIBLE
                 btnEdit.visibility = View.VISIBLE
@@ -63,15 +67,16 @@ class FarmersAdapter(
                 btnDelete.visibility = View.GONE
             }
 
-            // Handle klik tombol untuk aksi
-            btnToggleStatus.setOnClickListener {
-                toggleStatus(farmer)
-            }
+            Glide.with(itemView.context)
+                .load(farmer.photoUrl ?: R.drawable.ic_image_placeholder)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_broken_image)
+                .into(ivFarmerPhoto)
 
+            btnToggleStatus.setOnClickListener { toggleStatus(farmer) }
             btnEdit.setOnClickListener {
                 Toast.makeText(itemView.context, "Edit clicked untuk ${farmer.nama}", Toast.LENGTH_SHORT).show()
             }
-
             btnDelete.setOnClickListener {
                 Toast.makeText(itemView.context, "Delete clicked untuk ${farmer.nama}", Toast.LENGTH_SHORT).show()
             }

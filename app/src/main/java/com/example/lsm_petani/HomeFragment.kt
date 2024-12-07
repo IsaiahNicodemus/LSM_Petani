@@ -27,6 +27,9 @@ class HomeFragment : Fragment() {
     private var hasShownRoleDialog = false
     private var hasShownDataDialog = false
 
+    private lateinit var btnEdit: FloatingActionButton
+    private lateinit var btnDelete: FloatingActionButton
+
     private var isAdmin: Boolean = false // Default bukan admin
 
     override fun onCreateView(
@@ -44,45 +47,51 @@ class HomeFragment : Fragment() {
         farmerList = ArrayList()
         database = FirebaseDatabase.getInstance().getReference("lsm_pertanian")
 
-        checkUserRole()
+        checkUserRole() // Cek apakah user admin atau petani
         fetchFarmersData()
 
         fab.setOnClickListener {
-            handleFabClick()
+            val currentUser = auth.currentUser
+            if (currentUser != null) {
+                val userId = currentUser.uid
+                val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+
+                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val role = snapshot.child("role").value?.toString()
+                            if (role == "Admin" || role == "Petani") {
+                                // Admin dan Petani dapat menambah data
+                                val intent = Intent(context, NavigationActivity::class.java)
+                                intent.putExtra("navigateTo", "FarmersFragment")
+                                startActivity(intent)
+                            } else {
+                                // Selain Admin dan Petani, tampilkan dialog verifikasi
+                                showVerificationDialog()
+                            }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Pengguna tidak ditemukan di database!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(
+                            context,
+                            "Gagal memeriksa role: ${error.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
+            } else {
+                Toast.makeText(context, "Pengguna tidak terautentikasi!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         return view
-    }
-
-    private fun handleFabClick() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            val userId = currentUser.uid
-            val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
-
-            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        val role = snapshot.child("role").value?.toString()
-                        if (role == "Admin" || role == "Petani") {
-                            val intent = Intent(context, NavigationActivity::class.java)
-                            intent.putExtra("navigateTo", "FarmersFragment")
-                            startActivity(intent)
-                        } else {
-                            showVerificationDialog()
-                        }
-                    } else {
-                        Toast.makeText(context, "Pengguna tidak ditemukan di database!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(context, "Gagal memeriksa role: ${error.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            Toast.makeText(context, "Pengguna tidak terautentikasi!", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun showVerificationDialog() {
@@ -127,7 +136,7 @@ class HomeFragment : Fragment() {
                                 mainActivity.hasShownRoleDialog = true
                             }
                         }
-                        fetchFarmersData()
+                        fetchFarmersData() // Fetch data setelah role diketahui
                     } else {
                         Toast.makeText(context, "Pengguna tidak ditemukan di database!", Toast.LENGTH_SHORT).show()
                     }
@@ -149,7 +158,7 @@ class HomeFragment : Fragment() {
                 for (data in snapshot.children) {
                     val farmer = data.getValue(Farmer::class.java)?.copy(key = data.key)
                     if (farmer != null) {
-                        if (isAdmin || farmer.status) {
+                        if (isAdmin || farmer.status) { // Admin melihat semua, Petani hanya status = true
                             farmerList.add(farmer)
                         }
                     }

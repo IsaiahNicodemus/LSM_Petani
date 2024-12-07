@@ -10,14 +10,9 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.lsm_petani.model.Farmer
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-
-import android.Manifest
 import android.app.AlertDialog
-import android.content.pm.PackageManager
-import android.location.Location
-import androidx.core.app.ActivityCompat
-
 
 class FarmersFragment : Fragment() {
 
@@ -30,17 +25,20 @@ class FarmersFragment : Fragment() {
     private lateinit var etNamaPemilik: EditText
     private lateinit var btnSubmit: Button
     private lateinit var etNoHandphone: EditText
-
     private lateinit var progressBar: ProgressBar
 
     private var photoUri: Uri? = null
     private var selectedLocation: String? = null
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_farmers, container, false)
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
         // Initialize views
         ivPhotoPreview = view.findViewById(R.id.ivPhotoPreview)
@@ -52,7 +50,10 @@ class FarmersFragment : Fragment() {
         etNamaPemilik = view.findViewById(R.id.etNamaPemilik)
         btnSubmit = view.findViewById(R.id.btnSubmit)
         etNoHandphone = view.findViewById(R.id.etNoHandphone)
-        progressBar = view.findViewById(R.id.progressBar) // Inisialisasi ProgressBar
+        progressBar = view.findViewById(R.id.progressBar)
+
+        // Set username in EditText
+        setUsername()
 
         // Set button actions
         btnUploadPhoto.setOnClickListener { selectPhoto() }
@@ -61,6 +62,35 @@ class FarmersFragment : Fragment() {
 
         return view
     }
+
+    private fun setUsername() {
+        // Ambil nama pengguna dari Firebase Authentication
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user != null) {
+            // Jika displayName tersedia, set langsung
+            val displayName = user.displayName
+            if (!displayName.isNullOrEmpty()) {
+                etNama.setText(displayName)
+                return
+            }
+        }
+
+        // Jika displayName tidak tersedia, ambil dari database
+        val uid = user?.uid
+        if (uid != null) {
+            val databaseRef = FirebaseDatabase.getInstance().reference.child("users").child(uid)
+            databaseRef.get().addOnSuccessListener { snapshot ->
+                val username = snapshot.child("username").value as? String
+                etNama.setText(username ?: "Nama tidak tersedia")
+            }.addOnFailureListener {
+                etNama.setText("Nama tidak tersedia")
+            }
+        } else {
+            etNama.setText("Nama tidak tersedia")
+        }
+    }
+
 
     private fun selectPhoto() {
         val intent = Intent(Intent.ACTION_PICK)
@@ -81,14 +111,18 @@ class FarmersFragment : Fragment() {
         val noHandphone = etNoHandphone.text.toString()
 
         if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null) {
-            showDataDialog("Harap lengkapi semua data")
+            showDataDialog("Harap lengkapi semua data.")
             return
         }
 
         // Tampilkan ProgressBar sebelum memulai kirim data
         progressBar.visibility = View.VISIBLE
 
-        val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
+        // Menggunakan `push()` hanya untuk data petani, tanpa memasukkan ID pengguna ke struktur
+        val databaseRef = FirebaseDatabase.getInstance().reference
+            .child("lsm_pertanian")
+            .push()
+
         val farmer = Farmer(
             nama = nama,
             lokasi = selectedLocation,
@@ -103,13 +137,13 @@ class FarmersFragment : Fragment() {
             .addOnSuccessListener {
                 // Operasi berhasil, sembunyikan ProgressBar dan tampilkan notifikasi dalam dialog
                 progressBar.visibility = View.GONE
-                showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin")
+                showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
                 resetForm()
             }
             .addOnFailureListener {
                 // Operasi gagal, sembunyikan ProgressBar dan tampilkan dialog kesalahan
                 progressBar.visibility = View.GONE
-                showDataDialog("Gagal mengirim data. Silakan coba lagi")
+                showDataDialog("Gagal mengirim data. Silakan coba lagi.")
             }
     }
 
@@ -118,24 +152,20 @@ class FarmersFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("Informasi")
             .setMessage(message)
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-            }
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
     }
-
-
-
 
     private fun resetForm() {
         etNama.text.clear()
         etLuasLahan.text.clear()
         etNamaPemilik.text.clear()
-        etNoHandphone.text.clear() // Reset No Handphone
+        etNoHandphone.text.clear()
+        ivPhotoPreview.setImageResource(0)
+        tvSelectedLocation.text = ""
         selectedLocation = null
-        // Anda bisa menambahkan reset untuk komponen lain jika diperlukan
+        photoUri = null
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

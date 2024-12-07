@@ -8,7 +8,8 @@ data class Farmer(
     val namaPemilik: String? = null,
     val noHandphone: String? = null,
     val photoUrl: String? = null,
-    val status: Boolean = false // Field Baru
+    val status: Boolean = false,
+    val userId: String? = null // Tambahkan userId
 )
 
 

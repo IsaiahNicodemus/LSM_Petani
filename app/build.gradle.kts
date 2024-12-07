@@ -53,14 +53,13 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation ("com.google.firebase:firebase-auth:21.5.0")
     implementation ("com.google.firebase:firebase-storage:20.2.0")
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
     implementation ("com.google.firebase:firebase-database:20.0.5")
     implementation ("androidx.core:core:1.8.0")
 
     // Glide for image loading (single version)
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // RoundedImageView for rounded image views
     implementation("com.makeramen:roundedimageview:2.3.0")
