@@ -27,7 +27,7 @@ class HomeFragment : Fragment() {
     private var hasShownRoleDialog = false
     private var hasShownDataDialog = false
 
-    private var isAdmin: Boolean = true // Default bukan admin
+    private var isAdmin: Boolean = false // Default bukan admin
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
