@@ -7,6 +7,7 @@
     android:padding="16dp"
     android:layout_marginBottom="8dp">
 
+    <!-- Gambar Petani -->
     <ImageView
         android:id="@+id/ivFarmerPhoto"
         android:layout_width="match_parent"
@@ -14,6 +15,7 @@
         android:scaleType="centerCrop"
         android:background="@drawable/ic_image_placeholder" />
 
+    <!-- Nama Petani -->
     <TextView
         android:id="@+id/tvFarmerName"
         android:layout_width="wrap_content"
@@ -24,6 +26,7 @@
         android:textColor="@color/black"
         android:textSize="16sp" />
 
+    <!-- Lokasi Petani -->
     <TextView
         android:id="@+id/tvFarmerLocation"
         android:layout_width="wrap_content"
@@ -32,6 +35,7 @@
         android:textColor="@color/grey"
         android:textSize="14sp" />
 
+    <!-- Luas Lahan -->
     <TextView
         android:id="@+id/tvFarmerArea"
         android:layout_width="wrap_content"
@@ -40,6 +44,7 @@
         android:textColor="@color/black"
         android:textSize="14sp" />
 
+    <!-- Pemilik -->
     <TextView
         android:id="@+id/tvFarmerOwner"
         android:layout_width="wrap_content"
@@ -48,6 +53,7 @@
         android:textColor="@color/black"
         android:textSize="14sp" />
 
+    <!-- No Handphone -->
     <TextView
         android:id="@+id/tvFarmerPhone"
         android:layout_width="wrap_content"
@@ -56,20 +62,47 @@
         android:textColor="@color/black"
         android:textSize="14sp" />
 
+    <!-- Status Petani -->
     <TextView
         android:id="@+id/tvFarmerStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Status: Ditampilkan"
         android:textSize="14sp"
-        android:layout_marginTop="4dp"/>
+        android:layout_marginTop="4dp" />
 
+    <!-- Tombol Verifikasi Status di atas -->
     <Button
         android:id="@+id/btnToggleStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Verifikasi Status"        android:layout_marginTop="8dp"
-        android:visibility="gone" /> <!-- Default: disembunyikan untuk user biasa -->
+        android:text="Verifikasi Status"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
 
+    <!-- Tombol Edit dan Delete dalam satu barisan horizontal -->
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Edit"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Delete"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </LinearLayout>
