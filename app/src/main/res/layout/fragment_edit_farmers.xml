@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/ivFarmerPhoto"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_image_placeholder"
+        android:contentDescription="Farmer Photo" />
+
+    <EditText
+        android:id="@+id/etFarmerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nama Petani"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/etFarmerLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Lokasi"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/etFarmerArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Luas Lahan (m²)"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/etFarmerOwner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pemilik"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/etFarmerPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="No. HP"
+        android:inputType="phone" />
+
+    <EditText
+        android:id="@+id/etFarmerPricePerMeter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Harga/m²"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:id="@+id/tvFarmerDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Tanggal"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnPickDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pilih Tanggal" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Simpan Perubahan"
+        android:layout_marginTop="16dp" />
+</LinearLayout>

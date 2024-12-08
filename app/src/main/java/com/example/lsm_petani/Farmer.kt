@@ -9,7 +9,9 @@ data class Farmer(
     val noHandphone: String? = null,
     val photoUrl: String? = null,
     val status: Boolean = false,
-    val userId: String? = null // Tambahkan userId
+    val userId: String? = null, // ID pengguna yang menambahkan data
+    val pricePerMeter: Double? = null, // Tambahkan harga per meter
+    val timestamp: Long? = null // Tambahkan timestamp
 )
 
 

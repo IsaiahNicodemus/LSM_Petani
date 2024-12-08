@@ -15,6 +15,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HomeFragment : Fragment() {
 
@@ -23,14 +25,7 @@ class HomeFragment : Fragment() {
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
     private lateinit var fab: FloatingActionButton
-
-    private var hasShownRoleDialog = false
-    private var hasShownDataDialog = false
-
-    private lateinit var btnEdit: FloatingActionButton
-    private lateinit var btnDelete: FloatingActionButton
-
-    private var isAdmin: Boolean = false // Default bukan admin
+    private var isAdmin: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,68 +38,53 @@ class HomeFragment : Fragment() {
         recyclerView.setHasFixedSize(true)
 
         fab = view.findViewById(R.id.fab)
+        fab.setOnClickListener { navigateToAddFarmer() }
+
         auth = FirebaseAuth.getInstance()
         farmerList = ArrayList()
         database = FirebaseDatabase.getInstance().getReference("lsm_pertanian")
 
-        checkUserRole() // Cek apakah user admin atau petani
-        fetchFarmersData()
-
-        fab.setOnClickListener {
-            val currentUser = auth.currentUser
-            if (currentUser != null) {
-                val userId = currentUser.uid
-                val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
-
-                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        if (snapshot.exists()) {
-                            val role = snapshot.child("role").value?.toString()
-                            if (role == "Admin" || role == "Petani") {
-                                // Admin dan Petani dapat menambah data
-                                val intent = Intent(context, NavigationActivity::class.java)
-                                intent.putExtra("navigateTo", "FarmersFragment")
-                                startActivity(intent)
-                            } else {
-                                // Selain Admin dan Petani, tampilkan dialog verifikasi
-                                showVerificationDialog()
-                            }
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Pengguna tidak ditemukan di database!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        Toast.makeText(
-                            context,
-                            "Gagal memeriksa role: ${error.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                })
-            } else {
-                Toast.makeText(context, "Pengguna tidak terautentikasi!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
+        checkUserRole()
         return view
     }
 
-    private fun showVerificationDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Oops...")
-            .setMessage("Anda harus memverifikasi kalau Anda petani.")
-            .setPositiveButton("Verifikasi") { _, _ ->
-                val intent = Intent(context, NavigationActivity::class.java)
-                intent.putExtra("navigateTo", "FarmersFragment")
-                startActivity(intent)
-            }
-            .setNegativeButton("Batal", null)
-            .show()
+    private fun navigateToAddFarmer() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+
+            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val role = snapshot.child("role").value?.toString()
+                        if (role == "Admin" || role == "Petani") {
+                            val intent = Intent(context, NavigationActivity::class.java)
+                            intent.putExtra("navigateTo", "FarmersFragment")
+                            startActivity(intent)
+                        } else {
+                            showVerificationDialog()
+                        }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Pengguna tidak ditemukan di database!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(
+                        context,
+                        "Gagal memeriksa role: ${error.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+        } else {
+            Toast.makeText(context, "Pengguna tidak terautentikasi!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun checkUserRole() {
@@ -117,33 +97,23 @@ class HomeFragment : Fragment() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         val role = snapshot.child("role").value?.toString()
-                        val mainActivity = activity as MainActivity
-                        if (role == "Admin") {
-                            isAdmin = true
-                            if (!mainActivity.hasShownRoleDialog) {
-                                showRoleDialog("Login sebagai Admin")
-                                mainActivity.hasShownRoleDialog = true
-                            }
-                        } else if (role == "Petani") {
-                            isAdmin = false
-                            if (!mainActivity.hasShownRoleDialog) {
-                                showRoleDialog("Login sebagai Petani")
-                                mainActivity.hasShownRoleDialog = true
-                            }
-                        } else {
-                            if (!mainActivity.hasShownRoleDialog) {
-                                showRoleDialog("Login sebagai User")
-                                mainActivity.hasShownRoleDialog = true
-                            }
-                        }
-                        fetchFarmersData() // Fetch data setelah role diketahui
+                        isAdmin = role == "Admin"
+                        fetchFarmersData()
                     } else {
-                        Toast.makeText(context, "Pengguna tidak ditemukan di database!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Pengguna tidak ditemukan di database!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(context, "Gagal memeriksa role: ${error.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Gagal memeriksa role: ${error.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             })
         } else {
@@ -158,46 +128,80 @@ class HomeFragment : Fragment() {
                 for (data in snapshot.children) {
                     val farmer = data.getValue(Farmer::class.java)?.copy(key = data.key)
                     if (farmer != null) {
-                        if (isAdmin || farmer.status) { // Admin melihat semua, Petani hanya status = true
+                        if (isAdmin || farmer.status) {
                             farmerList.add(farmer)
                         }
                     }
                 }
 
-                val mainActivity = activity as MainActivity
                 if (farmerList.isEmpty()) {
-                    if (!mainActivity.hasShownDataDialog) {
-                        showDataDialog("Data tidak tersedia!")
-                        mainActivity.hasShownDataDialog = true
-                    }
-                } else {
-                    if (!mainActivity.hasShownDataDialog) {
-                        showDataDialog("Data berhasil dimuat: ${farmerList.size} item")
-                        mainActivity.hasShownDataDialog = true
-                    }
+                    showInfoDialog("Tidak ada data petani yang tersedia.")
                 }
 
-                val adapter = FarmersAdapter(farmerList, isAdmin)
+                val adapter = FarmersAdapter(farmerList, isAdmin, { farmer ->
+                    // Handle edit action
+                    val bundle = Bundle().apply {
+                        putString("farmer_key", farmer.key)
+                        putString("farmer_name", farmer.nama)
+                        putString("farmer_location", farmer.lokasi)
+                        putString("farmer_area", farmer.luasLahan)
+                        putString("farmer_owner", farmer.namaPemilik)
+                        putString("farmer_phone", farmer.noHandphone)
+                        putString("farmer_photo_url", farmer.photoUrl)
+                        putString("farmer_user_id", farmer.userId)
+                        putString("farmer_price_per_meter", farmer.pricePerMeter.toString())
+                        putString("farmer_timestamp", farmer.timestamp.toString())
+                    }
+
+                    val editFragment = EditFarmersFragment()
+                    editFragment.arguments = bundle
+
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, editFragment)
+                        .addToBackStack(null)
+                        .commit()
+                }, { farmer ->
+                    // Handle delete action
+                    deleteFarmer(farmer)
+                })
+
                 recyclerView.adapter = adapter
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(context, "Error memuat data: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Gagal memuat data: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun showRoleDialog(message: String) {
+
+
+    private fun deleteFarmer(farmer: Farmer) {
+        val key = farmer.key ?: return
+        val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian").child(key)
+        databaseRef.removeValue().addOnSuccessListener {
+            Toast.makeText(context, "Data petani berhasil dihapus", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener {
+            Toast.makeText(context, "Gagal menghapus data petani", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showVerificationDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Informasi Login")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
+            .setTitle("Verifikasi Diperlukan")
+            .setMessage("Hanya petani atau admin yang diizinkan menambah data.")
+            .setPositiveButton("Verifikasi") { _, _ ->
+                val intent = Intent(context, NavigationActivity::class.java)
+                intent.putExtra("navigateTo", "FarmersFragment")
+                startActivity(intent)
+            }
+            .setNegativeButton("Batal", null)
             .show()
     }
 
-    private fun showDataDialog(message: String) {
+    private fun showInfoDialog(message: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Informasi Data")
+            .setTitle("Informasi")
             .setMessage(message)
             .setPositiveButton("OK", null)
             .show()

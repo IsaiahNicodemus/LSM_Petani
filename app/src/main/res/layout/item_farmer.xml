@@ -71,6 +71,23 @@
         android:text="Status: Ditampilkan"
         android:textSize="14sp"
         android:layout_marginTop="4dp" />
+    <TextView
+        android:id="@+id/tvFarmerPricePerMeter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Harga/m²: Rp 0"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/tvFarmerTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tanggal: N/A"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+
 
     <!-- Tombol Verifikasi Status di atas -->
     <Button
@@ -81,7 +98,6 @@
         android:visibility="gone"
         android:layout_marginTop="8dp" />
 
-    <!-- Tombol Edit dan Delete dalam satu barisan horizontal -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
@@ -105,5 +121,6 @@
             android:text="Delete"
             android:visibility="gone" />
     </LinearLayout>
+
 
 </LinearLayout>

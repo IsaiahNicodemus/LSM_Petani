@@ -1,6 +1,9 @@
 package com.example.lsm_petani
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +15,7 @@ import androidx.fragment.app.Fragment
 import com.example.lsm_petani.model.Farmer
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import android.app.AlertDialog
+import java.util.*
 
 class FarmersFragment : Fragment() {
 
@@ -23,12 +26,16 @@ class FarmersFragment : Fragment() {
     private lateinit var tvSelectedLocation: TextView
     private lateinit var etLuasLahan: EditText
     private lateinit var etNamaPemilik: EditText
+    private lateinit var etHargaPerMeter: EditText
+    private lateinit var btnSelectDateTime: Button
+    private lateinit var tvSelectedDateTime: TextView
     private lateinit var btnSubmit: Button
     private lateinit var etNoHandphone: EditText
     private lateinit var progressBar: ProgressBar
 
     private var photoUri: Uri? = null
     private var selectedLocation: String? = null
+    private var selectedDateTime: String? = null
     private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
@@ -37,10 +44,7 @@ class FarmersFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_farmers, container, false)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
-
-        // Initialize views
         ivPhotoPreview = view.findViewById(R.id.ivPhotoPreview)
         btnUploadPhoto = view.findViewById(R.id.btnUploadPhoto)
         etNama = view.findViewById(R.id.etNama)
@@ -48,49 +52,20 @@ class FarmersFragment : Fragment() {
         tvSelectedLocation = view.findViewById(R.id.tvSelectedLocation)
         etLuasLahan = view.findViewById(R.id.etLuasLahan)
         etNamaPemilik = view.findViewById(R.id.etNamaPemilik)
+        etHargaPerMeter = view.findViewById(R.id.etHargaPerMeter)
+        btnSelectDateTime = view.findViewById(R.id.btnSelectDateTime)
+        tvSelectedDateTime = view.findViewById(R.id.tvSelectedDateTime)
         btnSubmit = view.findViewById(R.id.btnSubmit)
         etNoHandphone = view.findViewById(R.id.etNoHandphone)
         progressBar = view.findViewById(R.id.progressBar)
 
-        // Set username in EditText
-        setUsername()
-
-        // Set button actions
         btnUploadPhoto.setOnClickListener { selectPhoto() }
         btnSelectLocation.setOnClickListener { selectLocation() }
+        btnSelectDateTime.setOnClickListener { selectDateTime() }
         btnSubmit.setOnClickListener { submitForm() }
 
         return view
     }
-
-    private fun setUsername() {
-        // Ambil nama pengguna dari Firebase Authentication
-        val user = FirebaseAuth.getInstance().currentUser
-
-        if (user != null) {
-            // Jika displayName tersedia, set langsung
-            val displayName = user.displayName
-            if (!displayName.isNullOrEmpty()) {
-                etNama.setText(displayName)
-                return
-            }
-        }
-
-        // Jika displayName tidak tersedia, ambil dari database
-        val uid = user?.uid
-        if (uid != null) {
-            val databaseRef = FirebaseDatabase.getInstance().reference.child("users").child(uid)
-            databaseRef.get().addOnSuccessListener { snapshot ->
-                val username = snapshot.child("username").value as? String
-                etNama.setText(username ?: "Nama tidak tersedia")
-            }.addOnFailureListener {
-                etNama.setText("Nama tidak tersedia")
-            }
-        } else {
-            etNama.setText("Nama tidak tersedia")
-        }
-    }
-
 
     private fun selectPhoto() {
         val intent = Intent(Intent.ACTION_PICK)
@@ -99,9 +74,18 @@ class FarmersFragment : Fragment() {
     }
 
     private fun selectLocation() {
-        // Mock implementation for location selection
         selectedLocation = "Latitude: -6.200000, Longitude: 106.816666"
         tvSelectedLocation.text = selectedLocation
+    }
+
+    private fun selectDateTime() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
+            TimePickerDialog(requireContext(), { _, hour, minute ->
+                selectedDateTime = "$dayOfMonth/${month + 1}/$year $hour:$minute"
+                tvSelectedDateTime.text = selectedDateTime
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun submitForm() {
@@ -109,44 +93,41 @@ class FarmersFragment : Fragment() {
         val luasLahan = etLuasLahan.text.toString()
         val namaPemilik = etNamaPemilik.text.toString()
         val noHandphone = etNoHandphone.text.toString()
+        val hargaPerMeter = etHargaPerMeter.text.toString()
 
-        if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() || noHandphone.isEmpty() || selectedLocation == null) {
+        if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() ||
+            noHandphone.isEmpty() || hargaPerMeter.isEmpty() || selectedLocation == null || selectedDateTime == null
+        ) {
             showDataDialog("Harap lengkapi semua data.")
             return
         }
 
-        // Tampilkan ProgressBar sebelum memulai kirim data
         progressBar.visibility = View.VISIBLE
-
-        // Menggunakan `push()` hanya untuk data petani, tanpa memasukkan ID pengguna ke struktur
-        val databaseRef = FirebaseDatabase.getInstance().reference
-            .child("lsm_pertanian")
-            .push()
-
+        val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
         val farmer = Farmer(
             nama = nama,
             lokasi = selectedLocation,
             luasLahan = luasLahan,
             namaPemilik = namaPemilik,
             noHandphone = noHandphone,
-            photoUrl = photoUri?.toString(),
-            status = false
+            pricePerMeter = hargaPerMeter.toDoubleOrNull(), // Pastikan hargaPerMeter valid
+            timestamp = System.currentTimeMillis(), // Jika perlu, tambahkan timestamp
+            photoUrl = photoUri?.toString(), // Perbaiki ini menjadi photoUrl
+            status = false // Ini adalah Boolean yang benar
         )
+
 
         databaseRef.setValue(farmer)
             .addOnSuccessListener {
-                // Operasi berhasil, sembunyikan ProgressBar dan tampilkan notifikasi dalam dialog
                 progressBar.visibility = View.GONE
-                showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
+                showDataDialog("Data berhasil dikirim.")
                 resetForm()
             }
             .addOnFailureListener {
-                // Operasi gagal, sembunyikan ProgressBar dan tampilkan dialog kesalahan
                 progressBar.visibility = View.GONE
-                showDataDialog("Gagal mengirim data. Silakan coba lagi.")
+                showDataDialog("Gagal mengirim data.")
             }
     }
-
 
     private fun showDataDialog(message: String) {
         AlertDialog.Builder(requireContext())
@@ -161,9 +142,12 @@ class FarmersFragment : Fragment() {
         etLuasLahan.text.clear()
         etNamaPemilik.text.clear()
         etNoHandphone.text.clear()
+        etHargaPerMeter.text.clear()
         ivPhotoPreview.setImageResource(0)
         tvSelectedLocation.text = ""
+        tvSelectedDateTime.text = "Tanggal & Waktu belum dipilih"
         selectedLocation = null
+        selectedDateTime = null
         photoUri = null
     }
 

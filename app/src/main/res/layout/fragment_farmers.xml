@@ -95,6 +95,31 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone" />
+        <EditText
+            android:id="@+id/etHargaPerMeter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Harga Tanah per Meter (IDR)"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="16dp"
+            android:padding="12dp" />
+
+        <!-- Field DateTime -->
+        <Button
+            android:id="@+id/btnSelectDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pilih Tanggal dan Waktu"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvSelectedDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tanggal dan Waktu belum dipilih"
+            android:textColor="@color/grey"
+            android:layout_marginTop="8dp" />
+
 
         <!-- Submit Button -->
         <Button
