@@ -70,9 +70,10 @@ class NavigationActivity : AppCompatActivity() {
         }
 
         skipButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this@NavigationActivity, MainActivity::class.java)
+            intent.putExtra("navigateTo", "FarmersFragment") // Tambahkan informasi navigasi
             startActivity(intent)
-            finish()
+            finish() // Tutup GetStarted Activity
         }
     }
 

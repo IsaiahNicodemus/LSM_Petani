@@ -12,6 +12,14 @@
         android:src="@drawable/ic_image_placeholder"
         android:contentDescription="Farmer Photo" />
 
+    <Button
+        android:id="@+id/btnSelectPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload Foto"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
+
     <EditText
         android:id="@+id/etFarmerName"
         android:layout_width="match_parent"

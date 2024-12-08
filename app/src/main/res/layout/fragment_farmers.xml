@@ -109,7 +109,7 @@
             android:id="@+id/btnSelectDateTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pilih Tanggal dan Waktu"
+            android:text="Pilih Tanggal dan Waktu Upload"
             android:layout_marginTop="16dp" />
 
         <TextView

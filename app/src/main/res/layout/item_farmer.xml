@@ -65,13 +65,6 @@
 
     <!-- Status Petani -->
     <TextView
-        android:id="@+id/tvFarmerStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Status: Ditampilkan"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
-    <TextView
         android:id="@+id/tvFarmerPricePerMeter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -83,18 +76,24 @@
         android:id="@+id/tvFarmerTimestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tanggal: N/A"
+        android:text="Tanggal upload: N/A"
         android:textSize="14sp"
         android:layout_marginTop="4dp" />
 
-
+    <TextView
+        android:id="@+id/tvFarmerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: Ditampilkan"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
 
     <!-- Tombol Verifikasi Status di atas -->
     <Button
         android:id="@+id/btnToggleStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Verifikasi Status"
+        android:text="Verifikasi Data"
         android:visibility="gone"
         android:layout_marginTop="8dp" />
 
