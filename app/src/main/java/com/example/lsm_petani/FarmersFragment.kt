@@ -15,7 +15,10 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.lsm_petani.model.Farmer
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.io.File
@@ -27,7 +30,6 @@ class FarmersFragment : Fragment() {
     private lateinit var ivPhotoPreview: ImageView
     private lateinit var btnUploadPhoto: Button
     private lateinit var etNama: EditText
-    private lateinit var btnSelectLocation: Button
     private lateinit var tvSelectedLocation: TextView
     private lateinit var etLuasLahan: EditText
     private lateinit var etNamaPemilik: EditText
@@ -55,7 +57,6 @@ class FarmersFragment : Fragment() {
         ivPhotoPreview = view.findViewById(R.id.ivPhotoPreview)
         btnUploadPhoto = view.findViewById(R.id.btnUploadPhoto)
         etNama = view.findViewById(R.id.etNama)
-        btnSelectLocation = view.findViewById(R.id.btnSelectLocation)
         tvSelectedLocation = view.findViewById(R.id.tvSelectedLocation)
         etLuasLahan = view.findViewById(R.id.etLuasLahan)
         etNamaPemilik = view.findViewById(R.id.etNamaPemilik)
@@ -73,7 +74,6 @@ class FarmersFragment : Fragment() {
         setupAreaFormatter()
 
         btnUploadPhoto.setOnClickListener { selectPhoto() }
-        btnSelectLocation.setOnClickListener { selectLocation() }
         btnSelectDateTime.setOnClickListener { selectDateTime() }
         btnSubmit.setOnClickListener { submitForm() }
 
@@ -188,12 +188,6 @@ class FarmersFragment : Fragment() {
             .show()
     }
 
-
-    private fun selectLocation() {
-        val intent = Intent(requireContext(), MapsActivity::class.java)
-        startActivityForResult(intent, REQUEST_CODE_MAPS)
-    }
-
     private fun selectDateTime() {
         val calendar = Calendar.getInstance()
         DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
@@ -285,6 +279,15 @@ class FarmersFragment : Fragment() {
         }
     }
 
+    private fun updateMapLocation(latitude: Double, longitude: Double) {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync { googleMap ->
+            googleMap.clear() // Bersihkan marker sebelumnya
+            val location = LatLng(latitude, longitude)
+            googleMap.addMarker(MarkerOptions().position(location).title("Lokasi Petani"))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f)) // Zoom di lokasi tersebut
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -305,6 +308,7 @@ class FarmersFragment : Fragment() {
                     if (latitude != null && longitude != null) {
                         selectedLocation = "Lat: $latitude, Long: $longitude"
                         tvSelectedLocation.text = selectedLocation
+                        updateMapLocation(latitude, longitude)
                     } else {
                         Toast.makeText(requireContext(), "Lokasi belum dipilih.", Toast.LENGTH_SHORT).show()
                     }
