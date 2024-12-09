@@ -62,15 +62,6 @@
 
         </FrameLayout>
 
-
-        <!-- Input Lokasi -->
-        <Button
-            android:id="@+id/btnSelectLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Pilih Lokasi"
-            android:layout_marginTop="16dp" />
-
         <TextView
             android:id="@+id/tvSelectedLocation"
             android:layout_width="match_parent"
