@@ -89,7 +89,13 @@ class FarmersAdapter(
                 userRef.get().addOnSuccessListener { snapshot ->
                     val currentRole = snapshot.child("role").getValue(String::class.java)
 
-                    if (currentRole == "User") { // Periksa jika role saat ini adalah 'User'
+                    if (currentRole == null) {
+                        Toast.makeText(
+                            itemView.context,
+                            "Pengguna tidak memiliki role yang valid",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (currentRole == "User") {
                         userRef.child("role").setValue("Petani").addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 Toast.makeText(
@@ -122,6 +128,7 @@ class FarmersAdapter(
             }
         }
 
+
         private fun toggleStatus(farmer: Farmer) {
             val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian").child(farmer.key!!)
 
@@ -129,7 +136,7 @@ class FarmersAdapter(
                 if (task.isSuccessful) {
                     Toast.makeText(itemView.context, "Status berhasil diperbarui", Toast.LENGTH_SHORT).show()
 
-                    // Jika status berubah menjadi aktif (true), kita memeriksa untuk mengubah role
+                    // Jika status sekarang menjadi aktif, periksa perubahan role
                     if (!farmer.status) {
                         checkAndUpdateRole(farmer)
                     }
@@ -138,6 +145,7 @@ class FarmersAdapter(
                 }
             }
         }
+
 
     }
 
