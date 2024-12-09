@@ -58,13 +58,28 @@ class HomeFragment : Fragment() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         val role = snapshot.child("role").value?.toString()
-                        if (role == "Admin" || role == "Petani") {
-                            val intent = Intent(context, NavigationActivity::class.java)
-                            intent.putExtra("navigateTo", "FarmersFragment")
-                            startActivity(intent)
-                        } else {
-                            showVerificationDialog()
+                        when (role) {
+                            "User" -> {
+                                // Tampilkan dialog verifikasi terlebih dahulu
+                                showVerificationDialog {
+                                    // Jika dialog dikonfirmasi, navigasikan ke NavigationActivity
+                                    val intent = Intent(context, NavigationActivity::class.java)
+                                    intent.putExtra("navigateTo", "FarmersFragment")
+                                    startActivity(intent)
+                                }
+                            }
+                            "Admin", "Petani" -> {
+                                // Jika peran adalah "Admin" atau "Petani", langsung ke MainActivity dan navigasikan ke FarmersFragment
+                                val intent = Intent(requireContext(), MainActivity::class.java)
+                                intent.putExtra("navigateTo", "FarmersFragment")
+                                startActivity(intent)
+                                requireActivity().finish() // Tutup aktivitas saat ini
+                            }
+                            else -> {
+                                showVerificationDialog()
+                            }
                         }
+
                     } else {
                         Toast.makeText(
                             context,
@@ -174,8 +189,6 @@ class HomeFragment : Fragment() {
         })
     }
 
-
-
     private fun deleteFarmer(farmer: Farmer) {
         val key = farmer.key ?: return
         val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian").child(key)
@@ -194,6 +207,17 @@ class HomeFragment : Fragment() {
                 val intent = Intent(context, NavigationActivity::class.java)
                 intent.putExtra("navigateTo", "FarmersFragment")
                 startActivity(intent)
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun showVerificationDialog(onVerified: () -> Unit) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Verifikasi Diperlukan")
+            .setMessage("Anda harus memverifikasi kalau Anda petani. Silakan konfirmasi untuk melanjutkan.")
+            .setPositiveButton("Verifikasi") { _, _ ->
+                onVerified()
             }
             .setNegativeButton("Batal", null)
             .show()
