@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
+import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -156,7 +157,7 @@ class EditFarmersFragment : Fragment() {
         val phone = etFarmerPhone.text.toString()
         val pricePerMeter = etFarmerPricePerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0
 
-        if (farmerKey == null || selectedDate == null) {
+        if (farmerKey == null || selectedDate == null || selectedPhotoUrl == null) {
             Toast.makeText(context, "Data petani tidak valid!", Toast.LENGTH_SHORT).show()
             return
         }
@@ -168,13 +169,14 @@ class EditFarmersFragment : Fragment() {
             luasLahan = area.toString(),
             namaPemilik = owner,
             noHandphone = phone,
-            photoUrl = selectedPhotoUrl,
+            photoUrl = selectedPhotoUrl, // Path dari fungsi `savePhotoToCache`
             pricePerMeter = pricePerMeter,
             timestamp = selectedDate
         )
 
         updateFarmerData(updatedFarmer)
     }
+
 
 
     private fun updateFarmerData(farmer: Farmer) {
@@ -190,6 +192,24 @@ class EditFarmersFragment : Fragment() {
         }
     }
 
+    private fun savePhotoToCache(bitmap: android.graphics.Bitmap) {
+        try {
+            val cacheDir = requireContext().cacheDir
+            val photoFile = File(cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+            val outputStream = photoFile.outputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outputStream)
+            outputStream.close()
+
+            selectedPhotoUrl = photoFile.absolutePath
+            Glide.with(this).load(photoFile).into(ivFarmerPhoto) // Load ke ImageView
+            Toast.makeText(context, "Foto berhasil disimpan", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Gagal menyimpan foto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == android.app.Activity.RESULT_OK && data != null) {
@@ -200,11 +220,14 @@ class EditFarmersFragment : Fragment() {
                 }
                 102 -> { // Ambil foto dari kamera
                     val photoBitmap = data.extras?.get("data") as? android.graphics.Bitmap
-                    ivFarmerPhoto.setImageBitmap(photoBitmap)
+                    if (photoBitmap != null) {
+                        savePhotoToCache(photoBitmap)
+                    }
                 }
             }
         }
     }
+
 
 
 }

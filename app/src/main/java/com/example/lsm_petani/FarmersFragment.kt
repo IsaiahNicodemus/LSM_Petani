@@ -208,34 +208,60 @@ class FarmersFragment : Fragment() {
             val noHandphone = etNoHandphone.text.toString().trim()
             val hargaPerMeter = etHargaPerMeter.text.toString().trim()
 
+            // Validasi input sebelum melanjutkan
             if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() ||
-                noHandphone.isEmpty() || hargaPerMeter.isEmpty() || selectedLocation == null || selectedDateTime == null
+                noHandphone.isEmpty() || hargaPerMeter.isEmpty() || selectedLocation == null
             ) {
                 showDataDialog("Harap lengkapi semua data.")
                 return
             }
 
             progressBar.visibility = View.VISIBLE
-            saveFarmerData(userId)
+
+            // Ambil URI foto dari input (galeri/kamera)
+            val photoUrl = photoUri?.toString() ?: ""
+
+            // Panggil fungsi untuk menyimpan data
+            saveFarmerData(
+                userId = userId,
+                nama = nama,
+                luasLahan = luasLahan,
+                namaPemilik = namaPemilik,
+                noHandphone = noHandphone,
+                hargaPerMeter = hargaPerMeter,
+                lokasi = selectedLocation ?: "Lokasi belum dipilih",
+                photoUrl = photoUrl
+            )
         } else {
             showDataDialog("Anda harus login untuk melakukan tindakan ini.")
         }
     }
 
 
-    private fun saveFarmerData(userId: String) {
+    private fun saveFarmerData(
+        userId: String,
+        nama: String,
+        luasLahan: String,
+        namaPemilik: String,
+        noHandphone: String,
+        hargaPerMeter: String,
+        lokasi: String,
+        photoUrl: String
+    ) {
         val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian")
+
         val farmerData = Farmer(
             key = databaseRef.push().key,
-            nama = etNama.text.toString().trim(),
-            lokasi = selectedLocation ?: "Lokasi belum dipilih",
-            luasLahan = etLuasLahan.text.toString().replace(" m²", "").replace(",", "").trim(),
-            namaPemilik = etNamaPemilik.text.toString().trim(),
-            noHandphone = etNoHandphone.text.toString().trim(),
+            nama = nama,
+            lokasi = lokasi,
+            luasLahan = luasLahan.replace(" m²", "").replace(",", "").trim(),
+            namaPemilik = namaPemilik,
+            noHandphone = noHandphone,
             status = false,
-            pricePerMeter = etHargaPerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0,
+            pricePerMeter = hargaPerMeter.replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0,
             timestamp = System.currentTimeMillis(),
-            userId = userId
+            userId = userId,
+            photoUrl = photoUrl // Simpan URL foto dari submitForm()
         )
 
         databaseRef.child(farmerData.key!!).setValue(farmerData)
@@ -249,6 +275,7 @@ class FarmersFragment : Fragment() {
                 showDataDialog("Gagal mengirim data. Silakan coba lagi.")
             }
     }
+
 
 
 
