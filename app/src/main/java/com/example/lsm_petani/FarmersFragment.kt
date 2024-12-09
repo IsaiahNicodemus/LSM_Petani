@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.lsm_petani.model.Farmer
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.io.File
@@ -41,6 +42,8 @@ class FarmersFragment : Fragment() {
     private var selectedLocation: String? = null
     private var selectedDateTime: String? = null
     private lateinit var auth: FirebaseAuth
+    private val REQUEST_CODE_MAPS = 200
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +66,8 @@ class FarmersFragment : Fragment() {
         etNoHandphone = view.findViewById(R.id.etNoHandphone)
         progressBar = view.findViewById(R.id.progressBar)
 
+
+        setupMap()
         setUsername()
         setupPriceFormatter()
         setupAreaFormatter()
@@ -73,6 +78,17 @@ class FarmersFragment : Fragment() {
         btnSubmit.setOnClickListener { submitForm() }
 
         return view
+    }
+
+    private fun setupMap() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync { googleMap ->
+            googleMap.setOnMapClickListener {
+                // Arahkan ke MapsActivity ketika peta ditekan
+                val intent = Intent(requireContext(), MapsActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
     private fun setUsername() {
@@ -174,8 +190,8 @@ class FarmersFragment : Fragment() {
 
 
     private fun selectLocation() {
-        selectedLocation = "Latitude: -6.200000, Longitude: 106.816666"
-        tvSelectedLocation.text = selectedLocation
+        val intent = Intent(requireContext(), MapsActivity::class.java)
+        startActivityForResult(intent, REQUEST_CODE_MAPS)
     }
 
     private fun selectDateTime() {
@@ -272,19 +288,26 @@ class FarmersFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            101 -> { // Dari galeri
-                if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                101 -> {
                     photoUri = data?.data
                     ivPhotoPreview.setImageURI(photoUri)
                 }
-            }
-            102 -> { // Dari kamera
-                if (resultCode == Activity.RESULT_OK) {
+                102 -> {
                     val photoBitmap = data?.extras?.get("data") as? android.graphics.Bitmap
                     ivPhotoPreview.setImageBitmap(photoBitmap)
-                    // Simpan bitmap sebagai URI untuk diunggah jika diperlukan
                     photoUri = saveBitmapToUri(photoBitmap)
+                }
+                REQUEST_CODE_MAPS -> {
+                    val latitude = data?.getDoubleExtra("latitude", 0.0)
+                    val longitude = data?.getDoubleExtra("longitude", 0.0)
+                    if (latitude != null && longitude != null) {
+                        selectedLocation = "Lat: $latitude, Long: $longitude"
+                        tvSelectedLocation.text = selectedLocation
+                    } else {
+                        Toast.makeText(requireContext(), "Lokasi belum dipilih.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

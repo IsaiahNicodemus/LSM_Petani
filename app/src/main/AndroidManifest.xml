@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -19,7 +21,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LSM_Petani"
-        tools:targetApi="31" >
+        tools:targetApi="31">
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false" />
         <activity
             android:name=".tutorial.GetStarted"
             android:exported="false" />
@@ -32,7 +37,7 @@
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.LSM_Petani" >
+            android:theme="@style/Theme.LSM_Petani">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,6 +53,10 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBnHGNoiS7uqilxPTK_g_T4Ek87NfuYIVA" />
     </application>
 
 </manifest>
