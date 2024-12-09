@@ -82,16 +82,63 @@ class FarmersAdapter(
             }
         }
 
+        private fun checkAndUpdateRole(farmer: Farmer) {
+            if (farmer.userId != null && farmer.status) {
+                val userRef = FirebaseDatabase.getInstance().getReference("users").child(farmer.userId!!)
+
+                userRef.get().addOnSuccessListener { snapshot ->
+                    val currentRole = snapshot.child("role").getValue(String::class.java)
+
+                    if (currentRole == "User") { // Periksa jika role saat ini adalah 'User'
+                        userRef.child("role").setValue("Petani").addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(
+                                    itemView.context,
+                                    "Role pengguna berhasil diperbarui menjadi Petani",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    itemView.context,
+                                    "Gagal memperbarui role pengguna",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(
+                            itemView.context,
+                            "Pengguna sudah memiliki peran yang bukan 'User'",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        itemView.context,
+                        "Gagal memuat data pengguna",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
         private fun toggleStatus(farmer: Farmer) {
             val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian").child(farmer.key!!)
+
             databaseRef.child("status").setValue(!farmer.status).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(itemView.context, "Status berhasil diperbarui", Toast.LENGTH_SHORT).show()
+
+                    // Jika status berubah menjadi aktif (true), kita memeriksa untuk mengubah role
+                    if (!farmer.status) {
+                        checkAndUpdateRole(farmer)
+                    }
                 } else {
                     Toast.makeText(itemView.context, "Gagal memperbarui status", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
     }
 
 }

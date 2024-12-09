@@ -215,7 +215,7 @@ class HomeFragment : Fragment() {
     private fun showVerificationDialog(onVerified: () -> Unit) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Verifikasi Diperlukan")
-            .setMessage("Anda harus memverifikasi kalau Anda petani. Silakan konfirmasi untuk melanjutkan.")
+            .setMessage("Anda harus memverifikasi kalau Anda petani. Silakan konfirmasi untuk melanjutkan dan anda bisa menambah data.")
             .setPositiveButton("Verifikasi") { _, _ ->
                 onVerified()
             }

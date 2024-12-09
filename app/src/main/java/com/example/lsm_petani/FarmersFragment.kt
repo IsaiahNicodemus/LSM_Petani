@@ -199,34 +199,46 @@ class FarmersFragment : Fragment() {
     }
 
     private fun submitForm() {
-        val nama = etNama.text.toString().trim()
-        val luasLahan = etLuasLahan.text.toString().replace(" m²", "").replace(",", "").trim()
-        val namaPemilik = etNamaPemilik.text.toString().trim()
-        val noHandphone = etNoHandphone.text.toString().trim()
-        val hargaPerMeter = etHargaPerMeter.text.toString().replace("Rp. ", "").replace(",", "").trim()
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val userId = user.uid
+            val nama = etNama.text.toString().trim()
+            val luasLahan = etLuasLahan.text.toString().trim()
+            val namaPemilik = etNamaPemilik.text.toString().trim()
+            val noHandphone = etNoHandphone.text.toString().trim()
+            val hargaPerMeter = etHargaPerMeter.text.toString().trim()
 
-        if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() ||
-            noHandphone.isEmpty() || hargaPerMeter.isEmpty() || selectedLocation == null || selectedDateTime == null
-        ) {
-            showDataDialog("Harap lengkapi semua data.")
-            return
+            if (nama.isEmpty() || luasLahan.isEmpty() || namaPemilik.isEmpty() ||
+                noHandphone.isEmpty() || hargaPerMeter.isEmpty() || selectedLocation == null || selectedDateTime == null
+            ) {
+                showDataDialog("Harap lengkapi semua data.")
+                return
+            }
+
+            progressBar.visibility = View.VISIBLE
+            saveFarmerData(userId)
+        } else {
+            showDataDialog("Anda harus login untuk melakukan tindakan ini.")
         }
+    }
 
-        val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian").push()
-        val farmer = Farmer(
-            nama = nama,
-            lokasi = selectedLocation,
-            luasLahan = luasLahan,
-            namaPemilik = namaPemilik,
-            noHandphone = noHandphone,
-            pricePerMeter = hargaPerMeter.toDoubleOrNull(), // Parsing harga menjadi Double
-            timestamp = System.currentTimeMillis(), // Tambahkan timestamp jika perlu
-            photoUrl = photoUri?.toString(), // URL foto
-            status = false // Status default
+
+    private fun saveFarmerData(userId: String) {
+        val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian")
+        val farmerData = Farmer(
+            key = databaseRef.push().key,
+            nama = etNama.text.toString().trim(),
+            lokasi = selectedLocation ?: "Lokasi belum dipilih",
+            luasLahan = etLuasLahan.text.toString().replace(" m²", "").replace(",", "").trim(),
+            namaPemilik = etNamaPemilik.text.toString().trim(),
+            noHandphone = etNoHandphone.text.toString().trim(),
+            status = false,
+            pricePerMeter = etHargaPerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0,
+            timestamp = System.currentTimeMillis(),
+            userId = userId
         )
 
-        progressBar.visibility = View.VISIBLE
-        databaseRef.setValue(farmer)
+        databaseRef.child(farmerData.key!!).setValue(farmerData)
             .addOnSuccessListener {
                 progressBar.visibility = View.GONE
                 showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
@@ -237,6 +249,7 @@ class FarmersFragment : Fragment() {
                 showDataDialog("Gagal mengirim data. Silakan coba lagi.")
             }
     }
+
 
 
     private fun showDataDialog(message: String) {
