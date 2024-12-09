@@ -86,7 +86,7 @@ class FarmersFragment : Fragment() {
             googleMap.setOnMapClickListener {
                 // Arahkan ke MapsActivity ketika peta ditekan
                 val intent = Intent(requireContext(), MapsActivity::class.java)
-                startActivity(intent)
+                startActivityForResult(intent, REQUEST_CODE_MAPS)
             }
         }
     }
