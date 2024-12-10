@@ -1,5 +1,6 @@
 package com.example.lsm_petani
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.lsm_petani.model.Farmer
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -53,26 +55,39 @@ class FarmersAdapter(
             tvArea.text = "Luas: ${farmer.luasLahan} m²"
             tvOwner.text = "Pemilik: ${farmer.namaPemilik}"
             tvPhone.text = "No HP: ${farmer.noHandphone}"
-            tvStatus.text = "Status: ${if (farmer.status) "Aktif" else "Menunggu diverifikasi"}"
 
-            // Menampilkan harga per meter
             tvPricePerMeter.text = "Harga/m²: Rp ${farmer.pricePerMeter?.let { String.format("%,.0f", it) } ?: "0"}"
 
-            // Menampilkan tanggal
             val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             val date = farmer.timestamp?.toLong()?.let { Date(it) }
             tvTimestamp.text = "Tanggal: ${date?.let { sdf.format(it) } ?: "N/A"}"
 
-            Glide.with(itemView.context)
-                .load(farmer.photoUrl ?: R.drawable.ic_image_placeholder)
-                .placeholder(R.drawable.ic_image_placeholder)
-                .into(ivFarmerPhoto)
+            // Debug Log untuk photoUrl
+            Log.d("FarmersAdapter", "Photo URL: ${farmer.photoUrl}")
+
+            // Gunakan Glide untuk menangani berbagai jenis URI
+            if (!farmer.photoUrl.isNullOrEmpty()) {
+                Glide.with(itemView.context)
+                    .load(farmer.photoUrl) // Dapatkan photoUrl dari database
+                    .placeholder(R.drawable.ic_image_placeholder)
+                    .error(R.drawable.ic_broken_image) // Placeholder jika gagal memuat
+                    .into(ivFarmerPhoto)
+            } else {
+                Glide.with(itemView.context)
+                    .load(R.drawable.ic_image_placeholder)
+                    .into(ivFarmerPhoto)
+            }
+
+            tvStatus.text = if (farmer.status) "Status: Aktif" else "Status: Menunggu Verifikasi"
 
             if (isAdmin) {
                 btnToggleStatus.visibility = View.VISIBLE
                 btnEdit.visibility = View.VISIBLE
                 btnDelete.visibility = View.VISIBLE
+
+                btnToggleStatus.text = if (farmer.status) "Tandai Tidak Aktif" else "Verifikasi Petani"
                 btnToggleStatus.setOnClickListener { toggleStatus(farmer) }
+
                 btnEdit.setOnClickListener { onEdit(farmer) }
                 btnDelete.setOnClickListener { onDelete(farmer) }
             } else {
@@ -82,63 +97,14 @@ class FarmersAdapter(
             }
         }
 
-        private fun checkAndUpdateRole(farmer: Farmer) {
-            if (farmer.userId != null && farmer.status) {
-                val userRef = FirebaseDatabase.getInstance().getReference("users").child(farmer.userId!!)
-
-                userRef.get().addOnSuccessListener { snapshot ->
-                    val currentRole = snapshot.child("role").getValue(String::class.java)
-
-                    if (currentRole == null) {
-                        Toast.makeText(
-                            itemView.context,
-                            "Pengguna tidak memiliki role yang valid",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else if (currentRole == "User") {
-                        userRef.child("role").setValue("Petani").addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(
-                                    itemView.context,
-                                    "Role pengguna berhasil diperbarui menjadi Petani",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                Toast.makeText(
-                                    itemView.context,
-                                    "Gagal memperbarui role pengguna",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    } else {
-                        Toast.makeText(
-                            itemView.context,
-                            "Pengguna sudah memiliki peran yang bukan 'User'",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }.addOnFailureListener {
-                    Toast.makeText(
-                        itemView.context,
-                        "Gagal memuat data pengguna",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-
-
         private fun toggleStatus(farmer: Farmer) {
             val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian").child(farmer.key!!)
-
-            databaseRef.child("status").setValue(!farmer.status).addOnCompleteListener { task ->
+            val newStatus = !farmer.status
+            databaseRef.child("status").setValue(newStatus).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(itemView.context, "Status berhasil diperbarui", Toast.LENGTH_SHORT).show()
-
-                    // Jika status sekarang menjadi aktif, periksa perubahan role
-                    if (!farmer.status) {
-                        checkAndUpdateRole(farmer)
+                    if (newStatus) {
+                        updateRoleToFarmer(farmer.userId)
                     }
                 } else {
                     Toast.makeText(itemView.context, "Gagal memperbarui status", Toast.LENGTH_SHORT).show()
@@ -146,8 +112,17 @@ class FarmersAdapter(
             }
         }
 
+        private fun updateRoleToFarmer(userId: String?) {
+            if (userId.isNullOrEmpty()) return
 
+            val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+            userRef.child("role").setValue("Petani").addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(itemView.context, "Role berhasil diperbarui menjadi Petani", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(itemView.context, "Gagal memperbarui role", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
-
 }
-

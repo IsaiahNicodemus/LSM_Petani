@@ -166,6 +166,7 @@ class HomeFragment : Fragment() {
                         putString("farmer_user_id", farmer.userId)
                         putString("farmer_price_per_meter", farmer.pricePerMeter.toString())
                         putString("farmer_timestamp", farmer.timestamp.toString())
+                        putString("user_id", farmer.userId) // Sertakan userId
                     }
 
                     val editFragment = EditFarmersFragment()
