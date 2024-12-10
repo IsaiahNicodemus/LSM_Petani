@@ -27,12 +27,20 @@
         android:hint="Nama Petani"
         android:inputType="text" />
 
-    <EditText
-        android:id="@+id/etFarmerLocation"
+    <TextView
+        android:id="@+id/tvSelectedLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Lokasi"
-        android:inputType="text" />
+        android:text="Lokasi belum dipilih"
+        android:padding="8dp"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnSelectLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pilih Lokasi" />
+
 
     <EditText
         android:id="@+id/etFarmerArea"

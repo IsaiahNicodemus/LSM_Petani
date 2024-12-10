@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -225,31 +226,88 @@ class FarmersFragment : Fragment() {
 
     private fun saveFarmerData(userId: String) {
         val databaseRef = FirebaseDatabase.getInstance().reference.child("lsm_pertanian")
-        val farmerData = Farmer(
-            key = databaseRef.push().key,
-            nama = etNama.text.toString().trim(),
-            lokasi = selectedLocation ?: "Lokasi belum dipilih",
-            luasLahan = etLuasLahan.text.toString().replace(" m²", "").replace(",", "").trim(),
-            namaPemilik = etNamaPemilik.text.toString().trim(),
-            noHandphone = etNoHandphone.text.toString().trim(),
-            status = false,
-            pricePerMeter = etHargaPerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0,
-            timestamp = System.currentTimeMillis(),
-            userId = userId
-        )
+        val nama = etNama.text.toString().trim()
+        val luasLahan = etLuasLahan.text.toString().replace(" m²", "").replace(",", "").trim()
+        val namaPemilik = etNamaPemilik.text.toString().trim()
+        val noHandphone = etNoHandphone.text.toString().trim()
+        val hargaPerMeter = etHargaPerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0
+        val location = selectedLocation ?: "Lokasi belum dipilih"
 
-        databaseRef.child(farmerData.key!!).setValue(farmerData)
-            .addOnSuccessListener {
+        if (photoUri != null) {
+            // Jika ada foto, unggah terlebih dahulu
+            uploadPhotoToFirebaseStorage(photoUri, { photoUrl ->
+                val farmerData = Farmer(
+                    key = databaseRef.push().key,
+                    nama = nama,
+                    lokasi = location,
+                    luasLahan = luasLahan,
+                    namaPemilik = namaPemilik,
+                    noHandphone = noHandphone,
+                    status = false,
+                    pricePerMeter = hargaPerMeter,
+                    timestamp = System.currentTimeMillis(),
+                    userId = userId,
+                    photoUrl = photoUrl // Simpan URL foto ke dalam database
+                )
+
+                databaseRef.child(farmerData.key!!).setValue(farmerData)
+                    .addOnSuccessListener {
+                        progressBar.visibility = View.GONE
+                        showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
+                        resetForm()
+                    }
+                    .addOnFailureListener {
+                        progressBar.visibility = View.GONE
+                        showDataDialog("Gagal mengirim data. Silakan coba lagi.")
+                    }
+            }, {
+                // Jika gagal mengunggah foto
                 progressBar.visibility = View.GONE
-                showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
-                resetForm()
-            }
-            .addOnFailureListener {
-                progressBar.visibility = View.GONE
-                showDataDialog("Gagal mengirim data. Silakan coba lagi.")
-            }
+                showDataDialog("Gagal mengunggah foto. Silakan coba lagi.")
+            })
+        } else {
+            // Jika tidak ada foto, simpan data tanpa foto
+            val farmerData = Farmer(
+                key = databaseRef.push().key,
+                nama = nama,
+                lokasi = location,
+                luasLahan = luasLahan,
+                namaPemilik = namaPemilik,
+                noHandphone = noHandphone,
+                status = false,
+                pricePerMeter = hargaPerMeter,
+                timestamp = System.currentTimeMillis(),
+                userId = userId,
+                photoUrl = "" // Tidak ada foto
+            )
+
+            databaseRef.child(farmerData.key!!).setValue(farmerData)
+                .addOnSuccessListener {
+                    progressBar.visibility = View.GONE
+                    showDataDialog("Data Anda berhasil terkirim, silakan tunggu verifikasi admin.")
+                    resetForm()
+                }
+                .addOnFailureListener {
+                    progressBar.visibility = View.GONE
+                    showDataDialog("Gagal mengirim data. Silakan coba lagi.")
+                }
+        }
     }
 
+    private fun uploadPhotoToFirebaseStorage(uri: Uri?, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        if (uri != null) {
+            val storageReference = FirebaseStorage.getInstance().reference.child("photos").child(UUID.randomUUID().toString())
+            val uploadTask = storageReference.putFile(uri)
+
+            uploadTask.addOnSuccessListener { taskSnapshot ->
+                storageReference.downloadUrl.addOnSuccessListener { downloadUri ->
+                    onSuccess(downloadUri.toString()) // Kirimkan URL ke callback onSuccess
+                }.addOnFailureListener(onFailure)
+            }.addOnFailureListener(onFailure)
+        } else {
+            onFailure(Exception("URI foto tidak valid"))
+        }
+    }
 
 
     private fun showDataDialog(message: String) {
