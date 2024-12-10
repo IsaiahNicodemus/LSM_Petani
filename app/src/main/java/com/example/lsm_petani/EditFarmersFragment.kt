@@ -1,6 +1,6 @@
 package com.example.lsm_petani
 
-import android.app.Activity
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
@@ -16,129 +16,148 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.lsm_petani.model.Farmer
 import com.google.firebase.database.FirebaseDatabase
+import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
+
 
 class EditFarmersFragment : Fragment() {
 
     private lateinit var etFarmerName: EditText
-    private lateinit var tvSelectedLocation: TextView
+    private lateinit var etFarmerLocation: EditText
     private lateinit var etFarmerArea: EditText
     private lateinit var etFarmerOwner: EditText
     private lateinit var etFarmerPhone: EditText
     private lateinit var etFarmerPricePerMeter: EditText
+    private lateinit var tvFarmerDate: TextView
     private lateinit var ivFarmerPhoto: ImageView
-    private var selectedDate: Long? = null
+    private lateinit var btnSelectPhoto: Button
     private var farmerKey: String? = null
-    private var selectedLocation: String? = null
-    private val REQUEST_CODE_MAPS = 200
+    private var selectedDate: Long? = null
+    private var selectedPhotoUrl: String? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_edit_farmers, container, false)
-        val tvFarmerDate: TextView = view.findViewById(R.id.tvFarmerDate)
-        val btnPickDate: Button = view.findViewById(R.id.btnPickDate)
 
-        btnPickDate.setOnClickListener {
-            showDatePicker(tvFarmerDate)
-        }
-
-        // Inisialisasi View
+        // Initialize UI components
         etFarmerName = view.findViewById(R.id.etFarmerName)
-        tvSelectedLocation = view.findViewById(R.id.tvSelectedLocation)
+        etFarmerLocation = view.findViewById(R.id.etFarmerLocation)
         etFarmerArea = view.findViewById(R.id.etFarmerArea)
         etFarmerOwner = view.findViewById(R.id.etFarmerOwner)
         etFarmerPhone = view.findViewById(R.id.etFarmerPhone)
         etFarmerPricePerMeter = view.findViewById(R.id.etFarmerPricePerMeter)
+        tvFarmerDate = view.findViewById(R.id.tvFarmerDate)
         ivFarmerPhoto = view.findViewById(R.id.ivFarmerPhoto)
+        btnSelectPhoto = view.findViewById(R.id.btnSelectPhoto)
 
-        val btnSelectLocation: Button = view.findViewById(R.id.btnSelectLocation)
-        btnSelectLocation.setOnClickListener { openMapsActivity() }
+        btnSelectPhoto.setOnClickListener { selectPhoto() }
+        val btnPickDate: Button = view.findViewById(R.id.btnPickDate)
+        btnPickDate.setOnClickListener { showDatePicker() }
 
-        // Tombol Save
-        val btnSave: Button = view.findViewById(R.id.btnSave)
-        btnSave.setOnClickListener { saveFarmerData() }
-
-        // Get data dari argument
+        // Get data from arguments
         val bundle = arguments
         bundle?.let {
             farmerKey = it.getString("farmer_key")
             val farmerName = it.getString("farmer_name")
             val farmerLocation = it.getString("farmer_location")
-            val farmerArea = it.getString("farmer_area")
+            val farmerArea = it.getString("farmer_area")?.toDoubleOrNull() ?: 0.0
             val farmerOwner = it.getString("farmer_owner")
             val farmerPhone = it.getString("farmer_phone")
             val farmerPhotoUrl = it.getString("farmer_photo_url")
             val farmerPricePerMeter = it.getDouble("farmer_price_per_meter", 0.0)
+            val farmerDate = it.getLong("farmer_date", System.currentTimeMillis())
 
-            // Isi data ke view
+            // Populate fields
             etFarmerName.setText(farmerName ?: "")
-            tvSelectedLocation.text = farmerLocation ?: "Lokasi belum dipilih"
-            etFarmerArea.setText(farmerArea)
+            etFarmerLocation.setText(farmerLocation ?: "")
+            etFarmerArea.setText(formatArea(farmerArea))
             etFarmerOwner.setText(farmerOwner ?: "")
             etFarmerPhone.setText(farmerPhone ?: "")
             etFarmerPricePerMeter.setText(formatCurrency(farmerPricePerMeter))
+            selectedDate = farmerDate
+            updateDateText(farmerDate)
 
             Glide.with(this)
                 .load(farmerPhotoUrl ?: R.drawable.ic_image_placeholder)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_broken_image)
                 .into(ivFarmerPhoto)
-
-            selectedLocation = farmerLocation
         }
+
+        // Save button
+        val btnSave: Button = view.findViewById(R.id.btnSave)
+        btnSave.setOnClickListener { saveFarmerData() }
 
         return view
     }
 
-    private fun updateDateText(tvDate: TextView, dateInMillis: Long) {
-        val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        tvDate.text = formatter.format(Date(dateInMillis))
+    private fun formatArea(area: Double): String {
+        val formatter = NumberFormat.getInstance(Locale.US)
+        return "${formatter.format(area)} m²"
     }
 
-    private fun showDatePicker(tvDate: TextView) {
-        val calendar = Calendar.getInstance()
-        selectedDate?.let { calendar.timeInMillis = it }
-
-        val datePickerDialog = DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                // Perbarui tanggal yang dipilih
-                calendar.set(year, month, dayOfMonth)
-                selectedDate = calendar.timeInMillis
-                // Perbarui tampilan tanggal
-                updateDateText(tvDate, selectedDate!!)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        datePickerDialog.show()
-    }
-
-    private fun openMapsActivity() {
-        val intent = Intent(requireContext(), MapsActivity::class.java)
-        startActivityForResult(intent, REQUEST_CODE_MAPS)
-    }
-
+    // Function to format price to currency properly
     private fun formatCurrency(price: Double): String {
         val formatter = NumberFormat.getInstance(Locale.US)
         return "Rp. ${formatter.format(price)}"
     }
 
+    private fun selectPhoto() {
+        val options = arrayOf("Pilih dari Galeri", "Ambil Foto")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Unggah Foto")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> { // Galeri
+                        val intent = Intent(Intent.ACTION_PICK)
+                        intent.type = "image/*"
+                        startActivityForResult(intent, 101)
+                    }
+                    1 -> { // Kamera
+                        val intent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+                        startActivityForResult(intent, 102)
+                    }
+                }
+            }
+            .show()
+    }
+
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            requireContext(),
+            { _, year, month, day ->
+                calendar.set(year, month, day)
+                selectedDate = calendar.timeInMillis
+                updateDateText(selectedDate!!)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    private fun updateDateText(dateInMillis: Long) {
+        val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        tvFarmerDate.text = formatter.format(dateInMillis)
+    }
+
     private fun saveFarmerData() {
         val name = etFarmerName.text.toString()
-        val location = selectedLocation ?: tvSelectedLocation.text.toString()
-        val area = etFarmerArea.text.toString().replace(" m²", "").toDoubleOrNull() ?: 0.0
+        val location = etFarmerLocation.text.toString()
+        val area = etFarmerArea.text.toString().replace(" m²", "").replace(",", "").toDoubleOrNull() ?: 0.0
         val owner = etFarmerOwner.text.toString()
         val phone = etFarmerPhone.text.toString()
-        val pricePerMeter = etFarmerPricePerMeter.text.toString().replace("Rp. ", "").toDoubleOrNull() ?: 0.0
-        val photoUrl = "url_to_photo" // Use the URL of the selected photo if you implement photo upload logic
+        val pricePerMeter = etFarmerPricePerMeter.text.toString().replace("Rp. ", "").replace(",", "").toDoubleOrNull() ?: 0.0
 
-        if (farmerKey == null || selectedDate == null) {
+        if (farmerKey == null || selectedDate == null || selectedPhotoUrl == null) {
             Toast.makeText(context, "Data petani tidak valid!", Toast.LENGTH_SHORT).show()
             return
         }
@@ -150,7 +169,7 @@ class EditFarmersFragment : Fragment() {
             luasLahan = area.toString(),
             namaPemilik = owner,
             noHandphone = phone,
-            photoUrl = photoUrl,
+            photoUrl = selectedPhotoUrl, // Path dari fungsi `savePhotoToCache`
             pricePerMeter = pricePerMeter,
             timestamp = selectedDate
         )
@@ -158,18 +177,14 @@ class EditFarmersFragment : Fragment() {
         updateFarmerData(updatedFarmer)
     }
 
+
+
     private fun updateFarmerData(farmer: Farmer) {
         val databaseRef = FirebaseDatabase.getInstance().getReference("lsm_pertanian")
         farmer.key?.let {
             databaseRef.child(it).setValue(farmer)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Data petani berhasil diperbarui", Toast.LENGTH_SHORT).show()
-
-                    // Pindah ke HomeFragment menggunakan FragmentTransaction
-                    val transaction = parentFragmentManager.beginTransaction()
-                    transaction.replace(R.id.fragment_container, HomeFragment())  // Ganti dengan ID container yang sesuai
-                    transaction.addToBackStack(null)  // Menambahkan ke back stack (opsional)
-                    transaction.commit()
                 }
                 .addOnFailureListener {
                     Toast.makeText(context, "Gagal memperbarui data petani", Toast.LENGTH_SHORT).show()
@@ -177,19 +192,42 @@ class EditFarmersFragment : Fragment() {
         }
     }
 
+    private fun savePhotoToCache(bitmap: android.graphics.Bitmap) {
+        try {
+            val cacheDir = requireContext().cacheDir
+            val photoFile = File(cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+            val outputStream = photoFile.outputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outputStream)
+            outputStream.close()
+
+            selectedPhotoUrl = photoFile.absolutePath
+            Glide.with(this).load(photoFile).into(ivFarmerPhoto) // Load ke ImageView
+            Toast.makeText(context, "Foto berhasil disimpan", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Gagal menyimpan foto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_MAPS && resultCode == Activity.RESULT_OK) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-
-            if (latitude != null && longitude != null) {
-                selectedLocation = "Lat: $latitude, Long: $longitude"
-                tvSelectedLocation.text = selectedLocation
-            } else {
-                Toast.makeText(requireContext(), "Lokasi belum dipilih.", Toast.LENGTH_SHORT).show()
+        if (resultCode == android.app.Activity.RESULT_OK && data != null) {
+            when (requestCode) {
+                101 -> { // Photo dari galeri
+                    selectedPhotoUrl = data.data.toString()
+                    Glide.with(this).load(selectedPhotoUrl).into(ivFarmerPhoto)
+                }
+                102 -> { // Ambil foto dari kamera
+                    val photoBitmap = data.extras?.get("data") as? android.graphics.Bitmap
+                    if (photoBitmap != null) {
+                        savePhotoToCache(photoBitmap)
+                    }
+                }
             }
         }
     }
+
+
+
 }
