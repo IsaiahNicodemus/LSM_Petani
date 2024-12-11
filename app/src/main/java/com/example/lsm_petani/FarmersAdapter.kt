@@ -1,6 +1,5 @@
 package com.example.lsm_petani
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,6 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.lsm_petani.model.Farmer
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -20,8 +18,8 @@ import java.util.Locale
 class FarmersAdapter(
     private val farmers: List<Farmer>,
     private val isAdmin: Boolean,
-    private val onEditClicked: (Farmer) -> Unit,
-    private val onDeleteClicked: (Farmer) -> Unit
+    private val onEdit: (Farmer) -> Unit,
+    private val onDelete: (Farmer) -> Unit
 ) : RecyclerView.Adapter<FarmersAdapter.FarmerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FarmerViewHolder {
@@ -32,8 +30,7 @@ class FarmersAdapter(
     override fun getItemCount(): Int = farmers.size
 
     override fun onBindViewHolder(holder: FarmerViewHolder, position: Int) {
-        val farmer = farmers[position]
-        holder.bind(farmer)
+        holder.bind(farmers[position])
     }
 
     inner class FarmerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -43,9 +40,9 @@ class FarmersAdapter(
         private val tvArea: TextView = itemView.findViewById(R.id.tvFarmerArea)
         private val tvOwner: TextView = itemView.findViewById(R.id.tvFarmerOwner)
         private val tvPhone: TextView = itemView.findViewById(R.id.tvFarmerPhone)
+        private val tvStatus: TextView = itemView.findViewById(R.id.tvFarmerStatus)
         private val tvPricePerMeter: TextView = itemView.findViewById(R.id.tvFarmerPricePerMeter)
         private val tvTimestamp: TextView = itemView.findViewById(R.id.tvFarmerTimestamp)
-        private val tvStatus: TextView = itemView.findViewById(R.id.tvFarmerStatus)
         private val btnToggleStatus: Button = itemView.findViewById(R.id.btnToggleStatus)
         private val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
         private val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
@@ -56,37 +53,35 @@ class FarmersAdapter(
             tvArea.text = "Luas: ${farmer.luasLahan} m²"
             tvOwner.text = "Pemilik: ${farmer.namaPemilik}"
             tvPhone.text = "No HP: ${farmer.noHandphone}"
+
             tvPricePerMeter.text = "Harga/m²: Rp ${farmer.pricePerMeter?.let { String.format("%,.0f", it) } ?: "0"}"
 
-            tvTimestamp.text = farmer.timestamp?.toLong()?.let {
-                "Tanggal: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))}"
-            } ?: "Tanggal: N/A"
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val date = farmer.timestamp?.toLong()?.let { Date(it) }
+            tvTimestamp.text = "Tanggal: ${date?.let { sdf.format(it) } ?: "N/A"}"
+
+            Glide.with(itemView.context)
+                .load(farmer.photoUrl ?: R.drawable.ic_image_placeholder)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .into(ivFarmerPhoto)
 
             tvStatus.text = if (farmer.status) "Status: Aktif" else "Status: Menunggu Verifikasi"
-            loadFarmerImage(farmer.photoUrl)
-
-            btnEdit.setOnClickListener { onEditClicked(farmer) }
-            btnDelete.setOnClickListener { onDeleteClicked(farmer) }
-            btnToggleStatus.setOnClickListener { toggleStatus(farmer) }
 
             if (isAdmin) {
+                btnToggleStatus.visibility = View.VISIBLE
                 btnEdit.visibility = View.VISIBLE
                 btnDelete.visibility = View.VISIBLE
-                btnToggleStatus.visibility = View.VISIBLE
+
                 btnToggleStatus.text = if (farmer.status) "Tandai Tidak Aktif" else "Verifikasi Petani"
+                btnToggleStatus.setOnClickListener { toggleStatus(farmer) }
+
+                btnEdit.setOnClickListener { onEdit(farmer) }
+                btnDelete.setOnClickListener { onDelete(farmer) }
             } else {
+                btnToggleStatus.visibility = View.GONE
                 btnEdit.visibility = View.GONE
                 btnDelete.visibility = View.GONE
-                btnToggleStatus.visibility = View.GONE
             }
-        }
-
-        private fun loadFarmerImage(photoUrl: String?) {
-            Glide.with(itemView.context)
-                .load(photoUrl)
-                .placeholder(R.drawable.ic_image_placeholder)
-                .error(R.drawable.ic_broken_image)
-                .into(ivFarmerPhoto)
         }
 
         private fun toggleStatus(farmer: Farmer) {
@@ -95,6 +90,9 @@ class FarmersAdapter(
             databaseRef.child("status").setValue(newStatus).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(itemView.context, "Status berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                    if (newStatus) {
+                        updateRoleToFarmer(farmer.userId)
+                    }
                 } else {
                     Toast.makeText(itemView.context, "Gagal memperbarui status", Toast.LENGTH_SHORT).show()
                 }
