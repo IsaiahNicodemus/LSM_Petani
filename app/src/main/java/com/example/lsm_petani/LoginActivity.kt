@@ -18,6 +18,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private val CAMERA_PERMISSION_CODE = 100
+    private val NOTIFICATION_PERMISSION_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +42,9 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Periksa izin kamera saat aplikasi dibuka
+        // Periksa izin kamera dan notifikasi
         checkAndRequestCameraPermission()
+        checkAndRequestNotificationPermission()
 
         tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
@@ -78,19 +80,39 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Periksa dan minta izin untuk akses kamera.
+     */
     private fun checkAndRequestCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // Izin belum diberikan, tampilkan dialog untuk meminta izin
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.CAMERA),
                 CAMERA_PERMISSION_CODE
             )
         } else {
-            // Izin sudah diberikan
             Toast.makeText(this, "Akses kamera sudah diberikan!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Periksa dan minta izin untuk menampilkan notifikasi.
+     */
+    private fun checkAndRequestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                NOTIFICATION_PERMISSION_CODE
+            )
+        } else {
+            Toast.makeText(this, "Izin notifikasi sudah diberikan!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -100,11 +122,21 @@ class LoginActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Izin kamera berhasil diberikan!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
+
+        when (requestCode) {
+            CAMERA_PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Izin kamera berhasil diberikan!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            NOTIFICATION_PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Izin notifikasi berhasil diberikan!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Izin notifikasi ditolak.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

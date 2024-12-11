@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Lokasi"
-        android:textColor="@color/grey"
+        android:textColor="@color/black"
         android:textSize="14sp" />
 
     <!-- Luas Lahan -->
@@ -70,6 +70,7 @@
         android:layout_height="wrap_content"
         android:text="Harga/m²: Rp 0"
         android:textSize="14sp"
+        android:textColor="@color/black"
         android:layout_marginTop="4dp" />
 
     <TextView
@@ -78,6 +79,7 @@
         android:layout_height="wrap_content"
         android:text="Tanggal upload: N/A"
         android:textSize="14sp"
+        android:textColor="@color/black"
         android:layout_marginTop="4dp" />
 
     <TextView
@@ -86,6 +88,7 @@
         android:layout_height="wrap_content"
         android:text="Status: Ditampilkan"
         android:textSize="14sp"
+        android:textColor="@color/black"
         android:layout_marginTop="4dp" />
 
     <!-- Tombol Verifikasi Status di atas -->

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -10,7 +9,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Profile Settings -->
+        <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,6 +19,16 @@
             android:layout_marginBottom="16dp"
             android:textColor="@color/lavender" />
 
+        <!-- User Role -->
+        <TextView
+            android:id="@+id/tvUserRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Role: User"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Edit Profile -->
         <Button
             android:id="@+id/btnEditProfile"
             android:layout_width="match_parent"
@@ -29,7 +38,47 @@
             android:drawablePadding="8dp"
             android:background="@drawable/lavender_border"
             android:textColor="@android:color/white"
-            android:padding="12dp" />
-    </LinearLayout>
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
 
+        <!-- Theme Settings -->
+        <Button
+            android:id="@+id/btnThemeSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pengaturan Tema"
+            android:drawableLeft="@drawable/ic_baseline_theme_24"
+            android:drawablePadding="8dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Notifications -->
+        <Button
+            android:id="@+id/btnNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pengaturan Notifikasi"
+            android:drawableLeft="@drawable/ic_baseline_notifications_24"
+            android:drawablePadding="8dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Help and Support -->
+        <Button
+            android:id="@+id/btnHelpSupport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bantuan dan Dukungan"
+            android:drawableLeft="@drawable/ic_baseline_help_24"
+            android:drawablePadding="8dp"
+            android:background="@drawable/lavender_border"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
 </ScrollView>
