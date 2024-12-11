@@ -1,18 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AboutFragment">
+    tools:context=".AboutFragment"
+    android:background="@color/white">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="About Us Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/lavender"/>
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center_horizontal">
 
-</RelativeLayout>
+        <!-- Gambar Logo -->
+        <ImageView
+            android:id="@+id/logoImage"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/logo_toko"
+            android:contentDescription="Logo Toko"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Judul -->
+        <TextView
+            android:id="@+id/aboutTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tentang Kami"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Deskripsi -->
+        <TextView
+            android:id="@+id/aboutDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kami adalah toko terpercaya yang selalu berkomitmen memberikan produk berkualitas tinggi dan layanan terbaik kepada pelanggan kami. Visi kami adalah menciptakan pengalaman belanja yang memuaskan, dengan semangat kejujuran dan inovasi."
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"
+            android:gravity="center"
+            android:textColor="@color/grey"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Informasi Tambahan -->
+        <TextView
+            android:id="@+id/contactInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hubungi Kami:\nEmail: contact@tokokami.com\nTelepon: 123-456-7890"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+</ScrollView>

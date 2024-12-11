@@ -24,8 +24,8 @@
 
         <item
             android:id="@+id/nav_share"
-            android:icon="@drawable/nav_share"
-            android:title="Share"/>
+            android:icon="@drawable/account_24"
+            android:title="Account Status"/>
 
         <item
             android:id="@+id/nav_about"

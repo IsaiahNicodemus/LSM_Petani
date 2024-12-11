@@ -1,24 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:gravity="center">
 
+    <!-- Welcome Text -->
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Data yang Menunggu Verifikasi"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="16dp"
-        android:gravity="center" />
+        android:text="Halo, Pengguna!"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
 
-    <ListView
-        android:id="@+id/listView"
+    <!-- Role Information -->
+    <TextView
+        android:id="@+id/tvRole"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Role Anda: -"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Interactive Role Display -->
+    <ImageView
+        android:id="@+id/ivRoleIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="Role Icon"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Aesthetic Divider -->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp"
-        android:paddingTop="8dp" />
+        android:layout_height="1dp"
+        android:layout_marginVertical="16dp"/>
+
+
 </LinearLayout>
