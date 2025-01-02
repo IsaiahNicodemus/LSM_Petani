@@ -68,7 +68,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             )
             selectedLatLng = latLng
         }
-    }
+    }   
 
     override fun onBackPressed() {
         if (selectedLatLng != null || isLocationButtonClicked) {
